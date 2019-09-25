@@ -67,7 +67,6 @@ price = [item.find(class_='a-size-large a-color-price olpOfferPrice a-text-bold'
 print(price)
 
 
-
 # Class for entire row... but need to filter based on specific columns
 'a-row a-spacing-mini olpOffer'
 
