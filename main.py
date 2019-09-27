@@ -108,10 +108,29 @@ def getData(offer_list_index):
 print('\n\n\n')
 print('all offers {}'.format(len(Alloffers)))
 
+
 myPanda = pd.DataFrame()
 for i in Alloffers:   # for i in range(len(Alloffers)):
     if getData(i):
         myPanda = myPanda.append(getData(i), ignore_index=True)
+
+nestedDict = {}
+
+cnt = 0
+for i in Alloffers:   # for i in range(len(Alloffers)):
+    if getData(i):
+        # nestedDict[cnt] = getData(i)['price']
+        sellerStrip = re.search("^(.*)\n.*", getData(i)['seller'])
+        if sellerStrip is None:
+            sellerStrip = 'Amazon'
+        else:
+            sellerStrip = sellerStrip.group(0).strip()
+
+        nestedDict[sellerStrip] = getData(i)
+        cnt += 1
+
+
+print(nestedDict)
 
 
 # myPanda = myPanda.append(getData(Alloffers[2]), ignore_index=True)
@@ -123,3 +142,17 @@ print(myPanda[['price', 'condition']])
 
 # export the data into a csv file
 myPanda.to_csv('exported_to_csv.csv')
+
+# nestedDict = {0: {'price': 0,
+#                   'priceShipping': 0,
+#                   'priceTotal': 0,
+#                   'condition': 0,
+#                   'seller': 0,
+#                   'delivery': 0}}
+
+sampleDict = {'price': 1,
+              'priceShipping': 10,
+              'priceTotal': 10,
+              'condition': 10,
+              'seller': 10,
+              'delivery': 10}
