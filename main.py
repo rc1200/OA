@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -81,16 +82,18 @@ def getText(mainDiv, className):
         return '0'
 
 
+def getPriceOnly(priceString):
+    return(float(re.sub('[^0-9.]', "", priceString)))
+
+
 def getData(offer_list_index):
 
+    price = getPriceOnly(getText(offer_list_index, 'olpOfferPrice'))
+    priceShipping = getPriceOnly(getText(offer_list_index, 'olpShippingPrice'))
     sellerData = {
-        # price = getText(offer_list_index, 'olpOfferPrice')
-        # priceShipping = getText(offer_list_index, 'olpShippingPrice')
-        # condition = getText(offer_list_index, 'olpConditionColumn')
-        # seller = getText(offer_list_index, 'olpSellerColumn')
-        # delivery = getText(offer_list_index, 'olpDeliveryColumn')
-        'price': getText(offer_list_index, 'olpOfferPrice'),
-        'priceShipping': getText(offer_list_index, 'olpShippingPrice'),
+        'price': getPriceOnly(getText(offer_list_index, 'olpOfferPrice')),
+        'priceShipping': getPriceOnly(getText(offer_list_index, 'olpShippingPrice')),
+        'priceTotal': price + priceShipping,
         'condition': getText(offer_list_index, 'olpConditionColumn'),
         'seller': getText(offer_list_index, 'olpSellerColumn'),
         'delivery': getText(offer_list_index, 'olpDeliveryColumn')
@@ -107,7 +110,8 @@ print('all offers {}'.format(len(Alloffers)))
 
 myPanda = pd.DataFrame()
 for i in Alloffers:   # for i in range(len(Alloffers)):
-    myPanda = myPanda.append(getData(i), ignore_index=True)
+    if getData(i):
+        myPanda = myPanda.append(getData(i), ignore_index=True)
 
 
 # myPanda = myPanda.append(getData(Alloffers[2]), ignore_index=True)
@@ -115,26 +119,7 @@ for i in Alloffers:   # for i in range(len(Alloffers)):
 
 print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  my Panda ???????????????')
 print(myPanda)
-print(myPanda[['price', 'priceShipping']])
+print(myPanda[['price', 'condition']])
 
-
-# print(getData(Alloffers[1]))
-# getData(Alloffers[5])
-# getData(Alloffers[2])
-
-# for offer in Alloffers:
-#     print(offer)
-
-
-def justTesting():
-
-    items = Alloffers[-1].find_all(class_='tombstone-container')
-
-    # storing the text into a list using list comprehension
-    period_names = [item.find(class_='period-name').get_text() for item in items]
-    short_descriptions = [item.find(class_='short-desc').get_text() for item in items]
-    temperatures = [item.find(class_='temp').get_text() for item in items]
-
-    print(period_names)
-    print(short_descriptions)
-    print(temperatures)
+# export the data into a csv file
+myPanda.to_csv('exported_to_csv.csv')
