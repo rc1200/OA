@@ -86,15 +86,35 @@ def getPriceOnly(priceString):
     return(float(re.sub('[^0-9.]', "", priceString)))
 
 
+def extractViaRegex(strSample, regExPattern, groupNumber, NoneReplacementVal):
+    returnRegEx = re.search(regExPattern, strSample)
+    if returnRegEx is None:
+        returnRegEx = NoneReplacementVal
+    else:
+        returnRegEx = returnRegEx.group(groupNumber).strip()
+
+    return returnRegEx
+
+
 def getData(offer_list_index):
 
     price = getPriceOnly(getText(offer_list_index, 'olpOfferPrice'))
+    # price = float(extractViaRegex(getText(offer_list_index, 'olpOfferPrice'), '(\d+\.?\d+)', '0'))
     priceShipping = getPriceOnly(getText(offer_list_index, 'olpShippingPrice'))
+    allSellerInfo = getText(offer_list_index, 'olpSellerColumn')
+    sellerName = extractViaRegex(allSellerInfo, '^(.*)\n.*', 1, 'Amazon')
+    sellerPositive = int(extractViaRegex(allSellerInfo, '(\d\d)%', 1, '0'))
+    # sellerRating = extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0')
+    sellerRating = int(extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0').replace(',', ''))
+
     sellerData = {
         'price': getPriceOnly(getText(offer_list_index, 'olpOfferPrice')),
         'priceShipping': getPriceOnly(getText(offer_list_index, 'olpShippingPrice')),
         'priceTotal': price + priceShipping,
-        'condition': getText(offer_list_index, 'olpConditionColumn'),
+        'condition': re.sub(r'([^a-zA-Z0-9\-]+|(\n))', ' ', getText(offer_list_index, 'olpCondition').strip()),
+        'sellerName': sellerName,
+        'sellerPositive': sellerPositive,
+        'sellerRating': sellerRating,
         'seller': getText(offer_list_index, 'olpSellerColumn'),
         'delivery': getText(offer_list_index, 'olpDeliveryColumn')
     }
@@ -109,33 +129,18 @@ print('\n\n\n')
 print('all offers {}'.format(len(Alloffers)))
 
 
-myPanda = pd.DataFrame()
-for i in Alloffers:   # for i in range(len(Alloffers)):
-    if getData(i):
-        myPanda = myPanda.append(getData(i), ignore_index=True)
+# ************************************
 
-nestedDict = {}
+def storeToPandas(offers):
+    tempPandas = pd.DataFrame()
+    for i in offers:   # for i in range(len(Alloffers)):
+        if getData(i):
+            tempPandas = tempPandas.append(getData(i), ignore_index=True)
 
-cnt = 0
-for i in Alloffers:   # for i in range(len(Alloffers)):
-    if getData(i):
-        # nestedDict[cnt] = getData(i)['price']
-        sellerStrip = re.search("^(.*)\n.*", getData(i)['seller'])
-        if sellerStrip is None:
-            sellerStrip = 'Amazon'
-        else:
-            sellerStrip = sellerStrip.group(0).strip()
-
-        nestedDict[sellerStrip] = getData(i)
-        cnt += 1
+    return tempPandas
 
 
-print(nestedDict)
-
-
-# myPanda = myPanda.append(getData(Alloffers[2]), ignore_index=True)
-# myPanda = pd.DataFrame(getData(Alloffers[1]), index=[0])
-
+myPanda = storeToPandas(Alloffers)
 print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  my Panda ???????????????')
 print(myPanda)
 print(myPanda[['price', 'condition']])
@@ -143,16 +148,18 @@ print(myPanda[['price', 'condition']])
 # export the data into a csv file
 myPanda.to_csv('exported_to_csv.csv')
 
-# nestedDict = {0: {'price': 0,
-#                   'priceShipping': 0,
-#                   'priceTotal': 0,
-#                   'condition': 0,
-#                   'seller': 0,
-#                   'delivery': 0}}
 
-sampleDict = {'price': 1,
-              'priceShipping': 10,
-              'priceTotal': 10,
-              'condition': 10,
-              'seller': 10,
-              'delivery': 10}
+# ************************************
+
+
+def storeToNestedDict(sellerObject):
+    nestedDict = {}
+    for i in sellerObject:
+        sellerName = getData(i)['sellerName']
+        nestedDict[sellerName] = getData(i)
+
+    print(nestedDict)
+    return(nestedDict)
+
+
+storeToNestedDict(Alloffers)
