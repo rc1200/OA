@@ -45,6 +45,8 @@ weather_stuff.to_csv('exported_to_csv.csv')
 
 # store entire object into a variable
 
+# https://www.amazon.ca/gp/offer-listing/0143105426
+
 url = 'https://www.amazon.ca/gp/offer-listing/{}'.format('007738248X')
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 response = requests.get(url, headers=headers)
@@ -119,14 +121,10 @@ def getData(offer_list_index):
         'delivery': getText(offer_list_index, 'olpDeliveryColumn')
     }
 
-    for k, v in sellerData.items():
-        print('{} \t\t:----> {}'.format(k, v))
+    # for k, v in sellerData.items():
+    #     print('{} \t\t:----> {}'.format(k, v))
 
     return sellerData
-
-
-print('\n\n\n')
-print('all offers {}'.format(len(Alloffers)))
 
 
 # ************************************
@@ -141,10 +139,6 @@ def storeToPandas(offers):
 
 
 myPanda = storeToPandas(Alloffers)
-print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  my Panda ???????????????')
-print(myPanda)
-print(myPanda[['price', 'condition']])
-
 # export the data into a csv file
 myPanda.to_csv('exported_to_csv.csv')
 
@@ -154,11 +148,43 @@ myPanda.to_csv('exported_to_csv.csv')
 
 def storeToNestedDict(sellerObject):
     nestedDict = {}
-    for i in sellerObject:
-        sellerName = getData(i)['sellerName']
-        nestedDict[sellerName] = getData(i)
+    boolPutInDict = True
 
-    print(nestedDict)
+    conditoinTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good'
+    conditoinIncludeList = [x.strip() for x in conditoinTextIncludeList.split(',')]
+
+    deliveryTextExcludeList = 'xUnited, xStates, Canada, Japan'
+    deliveryExcludeSet = [x.strip() for x in deliveryTextExcludeList.split(',')]
+
+    for i in sellerObject:
+        boolPutInDict = True
+        sellerName = getData(i)['sellerName']
+
+        if getData(i)['priceTotal'] != 150.46:
+            boolPutInDict = False
+
+        if getData(i)['condition'] not in conditoinIncludeList:
+            boolPutInDict = False
+
+        if getData(i)['sellerPositive'] < 8:
+            boolPutInDict = False
+
+        if getData(i)['sellerRating'] < 0:
+            boolPutInDict = False
+
+        print(sellerName + '   zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' + getData(i)['delivery'])
+        deliveryStrippedSet = set(re.split('(\.|\s|\,)', getData(i)['delivery']))
+
+        print(deliveryStrippedSet)
+        print(deliveryExcludeSet)
+
+        if deliveryStrippedSet.intersection(deliveryExcludeSet):
+            boolPutInDict = False
+
+        if boolPutInDict == True:
+            nestedDict[sellerName] = getData(i)
+
+    # print(nestedDict)
     return(nestedDict)
 
 
