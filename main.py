@@ -46,20 +46,20 @@ weather_stuff.to_csv('exported_to_csv.csv')
 # store entire object into a variable
 
 # https://www.amazon.ca/gp/offer-listing/0143105426
-
-url = 'https://www.amazon.ca/gp/offer-listing/{}'.format('007738248X')
+ItemNumber = '007738248X'
+url = 'https://www.amazon.ca/gp/offer-listing/{}'.format(ItemNumber)
+url = 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(ItemNumber)
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-response = requests.get(url, headers=headers)
-# response = requests.get('https://www.amazon.ca/gp/offer-listing/007738248X')  NOTE: you might get this if you don't add headers 503 Server Error: Service Unavailable for url: https://www.amazon.ca/gp/offer-listing/007738248X
+# response = requests.get(url, headers=headers)
 
-try:
-    response.raise_for_status()
-except requests.exceptions.HTTPError as e:
-    print(e)
+# try:
+#     response.raise_for_status()
+# except requests.exceptions.HTTPError as e:
+#     print(e)
 
-
-# lets the object know we are passing an HTML and to pars it as that
-soup = BeautifulSoup(response.content, 'lxml')  # note for some reason html.parser was not getting all the data
+# soup = BeautifulSoup(response.content, 'lxml')  # note for some reason html.parser was not getting all the data
+soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
+soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
 
 
 # backup method if we needed to put a delay and actually open the page
@@ -108,6 +108,10 @@ def getData(offer_list_index):
     sellerPositive = int(extractViaRegex(allSellerInfo, '(\d\d)%', 1, '0'))
     # sellerRating = extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0')
     sellerRating = int(extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0').replace(',', ''))
+    delivery = getText(offer_list_index, 'olpDeliveryColumn')
+    isFBA = False
+    if 'Fulfillment by Amazon' in delivery:
+        isFBA = True
 
     sellerData = {
         'price': getPriceOnly(getText(offer_list_index, 'olpOfferPrice')),
@@ -117,8 +121,9 @@ def getData(offer_list_index):
         'sellerName': sellerName,
         'sellerPositive': sellerPositive,
         'sellerRating': sellerRating,
-        'seller': getText(offer_list_index, 'olpSellerColumn'),
-        'delivery': getText(offer_list_index, 'olpDeliveryColumn')
+        'seller': allSellerInfo,
+        'delivery': delivery,
+        'isFBA': isFBA
     }
 
     # for k, v in sellerData.items():
@@ -150,36 +155,53 @@ def storeToNestedDict(sellerObject):
     nestedDict = {}
     boolPutInDict = True
 
-    conditoinTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good'
+    # INCLUDE List for Condition
+    conditoinTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good, Used - Very Good'
+    # conditoinTextIncludeList = 'New'
     conditoinIncludeList = [x.strip() for x in conditoinTextIncludeList.split(',')]
 
-    deliveryTextExcludeList = 'xUnited, xStates, Canada, Japan'
-    deliveryExcludeSet = [x.strip() for x in deliveryTextExcludeList.split(',')]
+    # Exclude List for Seller info
+    sellerTextExcludeList = 'Just Launched'
+    sellerExcludeSet = set([x.strip() for x in sellerTextExcludeList.split(',')])
+
+    # Exclude List for Delivery
+    deliveryTextExcludeList = 'India'
+    deliveryExcludeSet = set([x.strip() for x in deliveryTextExcludeList.split(',')])
+
+    print(sellerExcludeSet)
+    print(deliveryExcludeSet)
 
     for i in sellerObject:
         boolPutInDict = True
         sellerName = getData(i)['sellerName']
 
-        if getData(i)['priceTotal'] != 150.46:
+        if getData(i)['priceTotal'] < 1:
             boolPutInDict = False
 
         if getData(i)['condition'] not in conditoinIncludeList:
             boolPutInDict = False
 
-        if getData(i)['sellerPositive'] < 8:
+        if getData(i)['sellerPositive'] < 0:
             boolPutInDict = False
 
         if getData(i)['sellerRating'] < 0:
             boolPutInDict = False
 
-        print(sellerName + '   zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz' + getData(i)['delivery'])
-        deliveryStrippedSet = set(re.split('(\.|\s|\,)', getData(i)['delivery']))
-
-        print(deliveryStrippedSet)
+        deliveryText = getData(i)['delivery']
+        print(sellerName + '   dddddddddddddddddddddddd' + deliveryText)
         print(deliveryExcludeSet)
+        for stringMatch in deliveryExcludeSet:
+            if stringMatch in deliveryText:
+                boolPutInDict = False
 
-        if deliveryStrippedSet.intersection(deliveryExcludeSet):
-            boolPutInDict = False
+        sellerText = getData(i)['seller']
+        print(sellerName + '   ssssssssssssssssssssssssss' + sellerText)
+        print(sellerExcludeSet)
+        for stringMatch in sellerExcludeSet:
+            print(stringMatch + '****************')
+            if stringMatch in sellerText:
+                print('get outttttttttttttttt')
+                boolPutInDict = False
 
         if boolPutInDict == True:
             nestedDict[sellerName] = getData(i)
@@ -188,4 +210,28 @@ def storeToNestedDict(sellerObject):
     return(nestedDict)
 
 
-storeToNestedDict(Alloffers)
+def getLowestPricedObject(myDict):
+    lowestPrice = 999999999999999
+    lowestKey = ''
+    boolFBAExists = False
+
+    for k, v in myDict.items():
+        if v['priceTotal'] < lowestPrice:
+            if v['isFBA']:
+                print('FBA in the houseeeeeeeeeeeeee')
+                boolFBAExists = True
+                lowestPrice = v['priceTotal']
+                lowestKey = k
+
+            if not boolFBAExists:
+                lowestPrice = v['priceTotal']
+                lowestKey = k
+                print('whereeeeeeeeeeeee my FBA')
+
+    return myDict[lowestKey]
+
+
+objectDict = storeToNestedDict(Alloffers)
+
+print(objectDict)
+print(getLowestPricedObject(objectDict))

@@ -1,10 +1,16 @@
 import re
-txt = 'Ships from Japan.\n          bef,comm      Learnshipping time. return policy.'
 
-deliveryStrippedSet = set(re.split('(\.|\s|\,)', txt))
-s1 = set(deliveryStrippedSet)
-print(s1)
+deliveryText = 'TotalBook \n\n\n4.5 out of 5 stars\n81% positive over the past 12 months. (22 total ratings)'
 
 
-for i in deliveryStrippedSet:
-    print(i)
+deliveryTextExcludeList = 'Japan, India, Amazon, 12 months'
+deliveryExcludeSet = set([x.strip() for x in deliveryTextExcludeList.split(',')])
+
+
+for stringMatch in deliveryExcludeSet:
+    if stringMatch in deliveryText:
+        print('get out')
+
+
+def isFBA(deliveryText):
+    return 'cool' if 'TotalBook' in deliveryText:
