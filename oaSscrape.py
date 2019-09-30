@@ -13,7 +13,11 @@ class AMZSoupObject:
                 = 'ca' to get the Canadian Prices
                 = 'com' to get the Americian Prices filtered by Prime Eligible
 
-            readFromFile => option parameter, if set then read from a file instead of going to actual site
+            readFromFile => option parameter, put File Name of the html document instad of fetching from web
+                            if has value then read from a file instead of going to actual site
+
+    sample: myAmazonObj = AMZSoupObject('007738248X', 'com', 'testUS.html') N.B. Reads from file because of file name 'testUS.html'
+    sample: myAmazonObj = AMZSoupObject('007738248X', 'com') NOT reading from file, instead going to web to fetch data
 
     '''
 
