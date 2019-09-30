@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class AMZSoupObject:
+class AMZSoupObject(object):
 
     ''' Creates soup object from Amazon Listing
         for parameters use:
@@ -39,11 +39,11 @@ class AMZSoupObject:
         if self.readFromFile is not None:
             # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
-            print('going to read file')
+            print('Reading from file')
             return BeautifulSoup(open(self.readFromFile), 'lxml')  # note for some reason html.parser was not getting all the data
         else:
             response = requests.get(self.urlType, headers=HEADERS)
-            print('going to web')
+            print('Reading from web')
 
             try:
                 response.raise_for_status()
@@ -51,3 +51,86 @@ class AMZSoupObject:
                 print(e)
 
             return response
+
+
+class AllOffersObject(object):
+    """docstring for Alloffers
+        all the offers for each ROW is stored in this Div class
+        creates a list of ojects which we will further parse out
+
+        getAllOffers: stores HTML doc for all the offers 
+
+
+
+    """
+
+    def __init__(self, offersSoup):
+        self.offersSoup = offersSoup
+
+    def getAllOffers(self):
+        return self.offersSoup.find_all(attrs={'class': 'olpOffer'})
+
+    # safeguad when fetching data if type is NONE ie. there is no text (ie. Shipping olpShippingPrice class)
+    def getText(self, sellerDivSoupObj, className):
+        if sellerDivSoupObj.find(attrs={'class': className}) is not None:
+            return sellerDivSoupObj.find(attrs={'class': className}).text.strip()
+        else:
+            return '0'
+
+    def getPriceOnly(self, priceString):
+        return(float(re.sub('[^0-9.]', "", priceString)))
+
+    def extractViaRegex(self, strSample, regExPattern, groupNumber, NoneReplacementVal):
+        returnRegEx = re.search(regExPattern, strSample)
+        if returnRegEx is None:
+            returnRegEx = NoneReplacementVal
+        else:
+            returnRegEx = returnRegEx.group(groupNumber).strip()
+
+        return returnRegEx
+
+    def getCategoryDataForOneSeller(self, offer_list_index):
+
+        price = self.getPriceOnly(self.getText(offer_list_index, 'olpOfferPrice'))
+        # price = float(extractViaRegex(getText(offer_list_index, 'olpOfferPrice'), '(\d+\.?\d+)', '0'))
+        priceShipping = self.getPriceOnly(self.getText(offer_list_index, 'olpShippingPrice'))
+        allSellerInfo = self.getText(offer_list_index, 'olpSellerColumn')
+        sellerName = self.extractViaRegex(allSellerInfo, '^(.*)\n.*', 1, 'Amazon')
+        sellerPositive = int(self.extractViaRegex(allSellerInfo, '(\d\d)%', 1, '0'))
+        # sellerRating = extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0')
+        sellerRating = int(self.extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0').replace(',', ''))
+        delivery = self.getText(offer_list_index, 'olpDeliveryColumn')
+        isFBA = False
+        if 'Fulfillment by Amazon' in delivery:
+            isFBA = True
+
+        sellerData = {
+            'price': self.getPriceOnly(self.getText(offer_list_index, 'olpOfferPrice')),
+            'priceShipping': self.getPriceOnly(self.getText(offer_list_index, 'olpShippingPrice')),
+            'priceTotal': price + priceShipping,
+            'condition': re.sub(r'([^a-zA-Z0-9\-]+|(\n))', ' ', self.getText(offer_list_index, 'olpCondition').strip()),
+            'sellerName': sellerName,
+            'sellerPositive': sellerPositive,
+            'sellerRating': sellerRating,
+            'seller': allSellerInfo,
+            'delivery': delivery,
+            'isFBA': isFBA
+        }
+
+        return sellerData
+
+    def storeAllOffersToPandas(self, allOffers):
+        tempPandas = pd.DataFrame()
+        for i in allOffers:
+            if self.getCategoryDataForOneSeller(i):
+                tempPandas = tempPandas.append(self.getCategoryDataForOneSeller(i), ignore_index=True)
+
+        # export the data into a csv file
+        tempPandas.to_csv('exported_to_csv.csv')
+        return tempPandas
+
+    def test(self, singleObj):
+        print(self.getText(self.offersSoup, 'olpOfferPrice'))
+        print(self.getCategoryDataForOneSeller(self.offersSoup))
+        print('ass')
+        print(self.storeToPandas(singleObj))
