@@ -67,6 +67,14 @@ class AllOffersObject(object):
     def __init__(self, offersSoup):
         self.offersSoup = offersSoup
 
+        # Private Varables N.B. Keep hard coded, add methon to update later
+        # INCLUDE List for Condition
+        self.__conditionTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good, Used - Very Good'
+        # Exclude List for Seller info
+        self.__sellerTextExcludeList = 'Just Launched'
+        # Exclude List for Delivery
+        self.__deliveryTextExcludeList = 'India'
+
     def getAllOffers(self):
         return self.offersSoup.find_all(attrs={'class': 'olpOffer'})
 
@@ -129,7 +137,91 @@ class AllOffersObject(object):
         tempPandas.to_csv('exported_to_csv.csv')
         return tempPandas
 
-    def test(self, singleObj):
+    def storeToNestedDict(self, sellerObject):
+        nestedDict = {}
+        boolPutInDict = True
+
+        # INCLUDE List for Condition
+        # conditoinTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good, Used - Very Good'
+        conditoinIncludeSet = set([x.strip() for x in self.__conditionTextIncludeList.split(',')])
+
+        # Exclude List for Seller info
+        # sellerTextExcludeList = 'Just Launched'
+        sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
+
+        # Exclude List for Delivery
+        # deliveryTextExcludeList = 'India'
+        deliveryExcludeSet = set([x.strip() for x in self.__deliveryTextExcludeList.split(',')])
+
+        print(conditoinIncludeSet)
+        print(sellerExcludeSet)
+        print(deliveryExcludeSet)
+
+        for i in sellerObject:
+            boolPutInDict = True
+            sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
+
+            if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
+                boolPutInDict = False
+
+            if self.getCategoryDataForOneSeller(i)['condition'] not in conditoinIncludeSet:
+                boolPutInDict = False
+
+            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
+                boolPutInDict = False
+
+            if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
+                boolPutInDict = False
+
+            deliveryText = self.getCategoryDataForOneSeller(i)['delivery']
+            print(sellerName + '   dddddddddddddddddddddddd' + deliveryText)
+            print(deliveryExcludeSet)
+            for stringMatch in deliveryExcludeSet:
+                if stringMatch in deliveryText:
+                    boolPutInDict = False
+
+            sellerText = self.getCategoryDataForOneSeller(i)['seller']
+            print(sellerName + '   ssssssssssssssssssssssssss' + sellerText)
+            print(sellerExcludeSet)
+            for stringMatch in sellerExcludeSet:
+                print(stringMatch + '****************')
+                if stringMatch in sellerText:
+                    print('get outttttttttttttttt')
+                    boolPutInDict = False
+
+            if boolPutInDict == True:
+                nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
+
+        # print(nestedDict)
+        return(nestedDict)
+
+    def getFullSellerDict(self, alloffersDivTxt):
+        combinedDict = self.storeToNestedDict(alloffersDivTxt)
+        return combinedDict
+
+    def getLowestPricedObjectBasedOnCriteria(self, myDict):
+
+        # myDict = getFullSellerDict(alloffersDivTxt)
+        lowestPrice = 999999999999999
+        lowestKey = ''
+        boolFBAExists = False
+
+        for k, v in myDict.items():
+            if v['priceTotal'] < lowestPrice:
+                if v['isFBA']:
+                    print('FBA in the houseeeeeeeeeeeeee')
+                    boolFBAExists = True
+                    lowestPrice = v['priceTotal']
+                    lowestKey = k
+
+                if not boolFBAExists:
+                    lowestPrice = v['priceTotal']
+                    lowestKey = k
+                    print('whereeeeeeeeeeeee my FBA')
+
+        return myDict[lowestKey]
+
+    def sandbox(self, singleObj):
         print(self.getText(self.offersSoup, 'olpOfferPrice'))
         print(self.getCategoryDataForOneSeller(self.offersSoup))
         print('ass')
