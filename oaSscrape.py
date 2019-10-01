@@ -141,21 +141,14 @@ class AllOffersObject(object):
         nestedDict = {}
         boolPutInDict = True
 
-        # INCLUDE List for Condition
-        # conditoinTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good, Used - Very Good'
+        # INCLUDE List for Condition (see private variables)
         conditoinIncludeSet = set([x.strip() for x in self.__conditionTextIncludeList.split(',')])
 
-        # Exclude List for Seller info
-        # sellerTextExcludeList = 'Just Launched'
+        # Exclude List for Seller info  (see private variables)
         sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
 
-        # Exclude List for Delivery
-        # deliveryTextExcludeList = 'India'
+        # Exclude List for Delivery  (see private variables)
         deliveryExcludeSet = set([x.strip() for x in self.__deliveryTextExcludeList.split(',')])
-
-        print(conditoinIncludeSet)
-        print(sellerExcludeSet)
-        print(deliveryExcludeSet)
 
         for i in sellerObject:
             boolPutInDict = True
@@ -174,25 +167,18 @@ class AllOffersObject(object):
                 boolPutInDict = False
 
             deliveryText = self.getCategoryDataForOneSeller(i)['delivery']
-            print(sellerName + '   dddddddddddddddddddddddd' + deliveryText)
-            print(deliveryExcludeSet)
             for stringMatch in deliveryExcludeSet:
                 if stringMatch in deliveryText:
                     boolPutInDict = False
 
             sellerText = self.getCategoryDataForOneSeller(i)['seller']
-            print(sellerName + '   ssssssssssssssssssssssssss' + sellerText)
-            print(sellerExcludeSet)
             for stringMatch in sellerExcludeSet:
-                print(stringMatch + '****************')
                 if stringMatch in sellerText:
-                    print('get outttttttttttttttt')
                     boolPutInDict = False
 
             if boolPutInDict == True:
                 nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
-        # print(nestedDict)
         return(nestedDict)
 
     def getFullSellerDict(self, alloffersDivTxt):
@@ -217,7 +203,6 @@ class AllOffersObject(object):
                 if not boolFBAExists:
                     lowestPrice = v['priceTotal']
                     lowestKey = k
-                    print('whereeeeeeeeeeeee my FBA')
 
         return myDict[lowestKey]
 
