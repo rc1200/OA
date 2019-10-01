@@ -43,7 +43,6 @@ class AMZSoupObject(object):
             return BeautifulSoup(open(self.readFromFile), 'lxml')  # note for some reason html.parser was not getting all the data
         else:
             response = requests.get(self.urlType, headers=HEADERS)
-            print('Reading from web')
 
             try:
                 response.raise_for_status()
@@ -195,7 +194,6 @@ class AllOffersObject(object):
         for k, v in myDict.items():
             if v['priceTotal'] < lowestPrice:
                 if v['isFBA']:
-                    print('FBA in the houseeeeeeeeeeeeee')
                     boolFBAExists = True
                     lowestPrice = v['priceTotal']
                     lowestKey = k
