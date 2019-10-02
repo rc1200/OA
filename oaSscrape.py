@@ -76,6 +76,10 @@ class AllOffersObject(object):
         # Exclude List for Delivery
         self.__deliveryTextExcludeList = 'India'
 
+        self.__PriceMustBeGreaterThan = 1
+        self.__PositiveFeedbackPctMustBeGreaterThan = 50
+        self.__SellerRatingMustBeGreaterThan = 0
+
     def getAllDataFromAttrib(self, htmlType=None, attribName=None):
 
         # htmlTypeVal = htmlType if htmlType else 'class'
@@ -108,9 +112,9 @@ class AllOffersObject(object):
         priceShipping = self.getPriceOnly(self.getText(offer_list_index, 'olpShippingPrice'))
         allSellerInfo = self.getText(offer_list_index, 'olpSellerColumn')
         sellerName = self.extractViaRegex(allSellerInfo, '^(.*)\n.*', 1, 'Amazon')
-        sellerPositive = int(self.extractViaRegex(allSellerInfo, '(\d\d)%', 1, '0'))
+        sellerPositive = int(self.extractViaRegex(allSellerInfo, '(\d+)%', 1, '0'))
         # sellerRating = extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0')
-        sellerRating = int(self.extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0').replace(',', ''))
+        sellerRating = int(self.extractViaRegex(allSellerInfo, '(\d?,?\d+)\stotal ratings', 1, '0').replace(',', ''))
         delivery = self.getText(offer_list_index, 'olpDeliveryColumn')
         isFBA = False
         if 'Fulfillment by Amazon' in delivery:
@@ -158,16 +162,22 @@ class AllOffersObject(object):
             boolPutInDict = True
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
 
-            if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
+            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
+                # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['condition'] not in conditoinIncludeSet:
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
+            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
+            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
+                # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
+                print('{}  xxxxxxxxxxxxxxxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
+            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
+                # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
+                # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
                 boolPutInDict = False
 
             deliveryText = self.getCategoryDataForOneSeller(i)['delivery']
@@ -186,8 +196,10 @@ class AllOffersObject(object):
         return(nestedDict)
 
     def getFullSellerDict(self, alloffersDivTxt):
-        combinedDict = self.storeToNestedDict(alloffersDivTxt)
-        return combinedDict
+        print(self.storeToNestedDict(alloffersDivTxt))
+        return self.storeToNestedDict(alloffersDivTxt)
+        # combinedDict = self.storeToNestedDict(alloffersDivTxt)
+        # return combinedDict
 
     def getLowestPricedObjectBasedOnCriteria(self, myDict):
 

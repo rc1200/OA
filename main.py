@@ -82,15 +82,15 @@ myASINList = df['ASIN'].drop_duplicates().values.tolist()
 print(myASINList)
 
 
-combinedDict = {}
-count = 1
-for i in myASINList:
-    print(i)
-    combinedDict[i] = getBothCAN_US(i)
+# combinedDict = {}
+# count = 1
+# for i in myASINList:
+#     print(i)
+#     combinedDict[i] = getBothCAN_US(i)
 
-print('combinedDict ==== ')
-print(combinedDict)
+# print('combinedDict ==== ')
+# print(combinedDict)
 
 
-# getBothCAN_US('0393975916')
+getBothCAN_US('0133356728')
 # getBothCAN_US('0131194577')
