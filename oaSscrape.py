@@ -57,7 +57,7 @@ class AllOffersObject(object):
         all the offers for each ROW is stored in this Div class
         creates a list of ojects which we will further parse out
 
-        getAllOffers: stores HTML doc for all the offers 
+        getAllDataFromAttrib: stores HTML doc for all the offers
 
 
 
@@ -74,8 +74,11 @@ class AllOffersObject(object):
         # Exclude List for Delivery
         self.__deliveryTextExcludeList = 'India'
 
-    def getAllOffers(self):
-        return self.offersSoup.find_all(attrs={'class': 'olpOffer'})
+    def getAllDataFromAttrib(self, htmlType=None, attribName=None):
+
+        htmlTypeVal = htmlType if htmlType else 'class'
+        attribNameVal = attribName if attribName else 'olpOffer'
+        return self.offersSoup.find_all(attrs={htmlTypeVal: attribNameVal})
 
     # safeguad when fetching data if type is NONE ie. there is no text (ie. Shipping olpShippingPrice class)
     def getText(self, sellerDivSoupObj, className):
@@ -209,3 +212,16 @@ class AllOffersObject(object):
         print(self.getCategoryDataForOneSeller(self.offersSoup))
         print('ass')
         print(self.storeToPandas(singleObj))
+
+
+class ObjByClassAttrib(AllOffersObject):
+
+    ''' inherit from AllOffersObject so we can reuse methods to grab data'''
+
+    # def __init__(self, classAttrib):
+    def __init__(self, offersSoup, classAttrib):
+        super().__init__(offersSoup)
+        self.classAttrib = classAttrib
+
+    def test(self):
+        print('this is a test : pass parameter {}'.format(self.classAttrib))
