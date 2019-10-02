@@ -6,14 +6,16 @@ from bs4 import BeautifulSoup
 
 class AMZSoupObject(object):
 
-    ''' Creates soup object from Amazon Listing
+    ''' Doc String
+
+        Creates soup object from Amazon Listing
         for parameters use:
             itemNumber => ISBN number for book
             dotCAordotCOM =>
                 = 'ca' to get the Canadian Prices
                 = 'com' to get the Americian Prices filtered by Prime Eligible
 
-            readFromFile => option parameter, put File Name of the html document instad of fetching from web
+            [readFromFile] => option parameter, put File Name of the html document instad of fetching from web
                             if has value then read from a file instead of going to actual site
 
     sample: myAmazonObj = AMZSoupObject('007738248X', 'com', 'testUS.html') N.B. Reads from file because of file name 'testUS.html'
@@ -42,14 +44,14 @@ class AMZSoupObject(object):
             print('Reading from file')
             return BeautifulSoup(open(self.readFromFile), 'lxml')  # note for some reason html.parser was not getting all the data
         else:
-            response = requests.get(self.urlType, headers=HEADERS)
+            response = requests.get(self.urlType(), headers=self.HEADERS)
 
             try:
                 response.raise_for_status()
             except requests.exceptions.HTTPError as e:
                 print(e)
 
-            return response
+            return BeautifulSoup(response.content, 'lxml')
 
 
 class AllOffersObject(object):
@@ -76,9 +78,9 @@ class AllOffersObject(object):
 
     def getAllDataFromAttrib(self, htmlType=None, attribName=None):
 
-        htmlTypeVal = htmlType if htmlType else 'class'
-        attribNameVal = attribName if attribName else 'olpOffer'
-        return self.offersSoup.find_all(attrs={htmlTypeVal: attribNameVal})
+        # htmlTypeVal = htmlType if htmlType else 'class'
+        # attribNameVal = attribName if attribName else 'olpOffer'
+        return self.offersSoup.find_all(attrs={htmlType: attribName})
 
     # safeguad when fetching data if type is NONE ie. there is no text (ie. Shipping olpShippingPrice class)
     def getText(self, sellerDivSoupObj, className):

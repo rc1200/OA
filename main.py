@@ -29,24 +29,36 @@ ItemNumber = '007738248X'
 # lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 # print(lowestDict)
 
+def urlType(dotCAordotCOM, itemNumber):
+    if dotCAordotCOM.upper() == 'CA':
+        return 'https://www.amazon.ca/gp/offer-listing/{}'.format(itemNumber)
+    elif dotCAordotCOM.upper() == 'COM':
+        return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(itemNumber)
+
 
 def getBothCAN_US(itemNum):
 
-    loopDict = {'canada': ['ca', 'test.html'],
-                'usa': ['com', 'testUS.html']
+        # for testing
+    # loopDict = {'canada': ['ca', 'test.html'],
+    #             'usa': ['com', 'testUS.html']
+    #             }
+
+    loopDict = {'canada': ['ca', None],
+                'usa': ['com', None]
                 }
 
     # compareDict = {itemNum: {}}
     compareDict = {}
 
     for k, v in loopDict.items():
-        print('reading dict {},{} {}'.format(k, v[0], v[1]))
+        print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
 
         myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
         soup = myAmazonObj.soupObj()
 
         alloffersObj = AllOffersObject(soup)  # stores the ENTIRE soup object to a Class to be further filtered
-        alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        # alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
         combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
         lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
         # print(lowestDict)
@@ -62,14 +74,23 @@ def getBothCAN_US(itemNum):
     return compareDict
 
 
-myISBNList = [ItemNumber, 22222222, 32156, 44444, 555555]
-combinedDict = {}
+# myASINList = [ItemNumber, 22222222, 32156, 44444, 555555]
 
+df = pd.read_csv('asin.csv')
+print(df)
+myASINList = df['ASIN'].drop_duplicates().values.tolist()
+print(myASINList)
+
+
+combinedDict = {}
 count = 1
-for i in myISBNList:
+for i in myASINList:
     print(i)
     combinedDict[i] = getBothCAN_US(i)
-    count += 13
 
 print('combinedDict ==== ')
 print(combinedDict)
+
+
+# getBothCAN_US('0393975916')
+# getBothCAN_US('0131194577')
