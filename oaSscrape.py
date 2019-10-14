@@ -75,10 +75,27 @@ class AllOffersObject(object):
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
         self.__deliveryTextExcludeList = 'India'
+        self._PriceMustBeGreaterThan = 1
+        self._PositiveFeedbackPctMustBeGreaterThan = 50
+        self._SellerRatingMustBeGreaterThan = 0
 
-        self.__PriceMustBeGreaterThan = 1
-        self.__PositiveFeedbackPctMustBeGreaterThan = 50
-        self.__SellerRatingMustBeGreaterThan = 0
+    # Option 1 for getter and setter, use variable to call the getter and setter methods and use as a property
+    def get_conditionTextIncludeList(self):
+        return self.__conditionTextIncludeList
+
+    def set_conditionTextIncludeList(self, setter_value):
+        self.__conditionTextIncludeList = setter_value
+
+    conditionTextIncludeListProperty = property(get_conditionTextIncludeList, set_conditionTextIncludeList)
+
+    # Option 2, explictly using decorators
+    @property
+    def deliveryTextExcludeListx(self):
+        return self.__deliveryTextExcludeList
+
+    @deliveryTextExcludeListx.setter
+    def deliveryTextExcludeListx(self, setter_value):
+        self.__deliveryTextExcludeList = setter_value
 
     def getAllDataFromAttrib(self, htmlType=None, attribName=None):
 
@@ -153,7 +170,7 @@ class AllOffersObject(object):
         conditoinIncludeSet = set([x.strip() for x in self.__conditionTextIncludeList.split(',')])
 
         # Exclude List for Seller info  (see private variables)
-        sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
+        sellerExcludeSet = set([x.strip() for x in self._sellerTextExcludeList.split(',')])
 
         # Exclude List for Delivery  (see private variables)
         deliveryExcludeSet = set([x.strip() for x in self.__deliveryTextExcludeList.split(',')])
@@ -162,20 +179,20 @@ class AllOffersObject(object):
             boolPutInDict = True
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
 
-            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
+            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self._PriceMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['condition'] not in conditoinIncludeSet:
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
-            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
+            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self._PositiveFeedbackPctMustBeGreaterThan:
+                # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
-                print('{}  xxxxxxxxxxxxxxxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
+                print('{}  xxxxxxxxxxxxxxxxxxxxxxxxxxxx {}'.format(self._PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
+            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self._SellerRatingMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
                 # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
                 boolPutInDict = False
