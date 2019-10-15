@@ -38,7 +38,7 @@ def urlType(dotCAordotCOM, itemNumber):
 
 def getBothCAN_US(itemNum):
 
-        # for testing
+    # uncomment for testing
     # loopDict = {'canada': ['ca', 'test.html'],
     #             'usa': ['com', 'testUS.html']
     #             }
@@ -53,13 +53,16 @@ def getBothCAN_US(itemNum):
     for k, v in loopDict.items():
         print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
 
+        # stores each Item into an amazon Object, first do Canada, then US based on Dict
         myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
         soup = myAmazonObj.soupObj()
 
         alloffersObj = AllOffersObject(soup)  # stores the ENTIRE soup object to a Class to be further filtered
-        # alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        # alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'} if left blank inside brackets
         alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
         combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
+        print('xxxxxxxxxxxxxxxxxxxxxxx current combinedDict below will be printed')
+        print(compareDict)
         lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
         # print(lowestDict)
         # compareDict[itemNum][k] = {'price': lowestDict['price'],
@@ -70,6 +73,7 @@ def getBothCAN_US(itemNum):
                           'Condition': lowestDict['condition']
                           }
 
+    print('********************************* Final combinedDict below will be printed')
     print(compareDict)
     return compareDict
 
@@ -92,5 +96,5 @@ print(myASINList)
 # print(combinedDict)
 
 
-getBothCAN_US('0133356728')
-# getBothCAN_US('0131194577')
+# getBothCAN_US('0133356728')
+getBothCAN_US('0131194577')

@@ -64,20 +64,31 @@ class AllOffersObject(object):
 
 
     """
+    # Class Variables, use Setters to change default values
+    __PriceMustBeGreaterThan = 1
+    __PositiveFeedbackPctMustBeGreaterThan = 50
+    __SellerRatingMustBeGreaterThan = -10
 
     def __init__(self, offersSoup):
         self.offersSoup = offersSoup
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextIncludeList = 'New, Used - Acceptable, Used - Like New, Used - Good, Used - Very Good'
+        self.__conditionTextIncludeList = 'New, Used - Like New, Used - Very Good, Used - Good, Used - Acceptable'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
         self.__deliveryTextExcludeList = 'India'
-        self._PriceMustBeGreaterThan = 1
-        self._PositiveFeedbackPctMustBeGreaterThan = 50
-        self._SellerRatingMustBeGreaterThan = 0
+
+    # Setters for Class Variables
+    def setPriceMustBeGreaterThan(self, v):
+        self.__PriceMustBeGreaterThan = v
+
+    def setPositiveFeedbackPctMustBeGreaterThan(self, v):
+        self.__PositiveFeedbackPctMustBeGreaterThan = v
+
+    def setSellerRatingMustBeGreaterThan(self, v):
+        self.__SellerRatingMustBeGreaterThan = v
 
     # Option 1 for getter and setter, use variable to call the getter and setter methods and use as a property
     def get_conditionTextIncludeList(self):
@@ -90,17 +101,17 @@ class AllOffersObject(object):
 
     # Option 2, explictly using decorators
     @property
-    def deliveryTextExcludeListx(self):
+    def deliveryTextExcludeList(self):
         return self.__deliveryTextExcludeList
 
-    @deliveryTextExcludeListx.setter
-    def deliveryTextExcludeListx(self, setter_value):
+    # @deliveryTextExcludeList.setter
+    # instead use a method instead to explictly define it is a method
+    def setDeliveryTextExcludeList(self, setter_value):
         self.__deliveryTextExcludeList = setter_value
 
     def getAllDataFromAttrib(self, htmlType=None, attribName=None):
-
-        # htmlTypeVal = htmlType if htmlType else 'class'
-        # attribNameVal = attribName if attribName else 'olpOffer'
+        htmlTypeVal = htmlType if htmlType else 'class'
+        attribNameVal = attribName if attribName else 'olpOffer'
         return self.offersSoup.find_all(attrs={htmlType: attribName})
 
     # safeguad when fetching data if type is NONE ie. there is no text (ie. Shipping olpShippingPrice class)
@@ -170,7 +181,7 @@ class AllOffersObject(object):
         conditoinIncludeSet = set([x.strip() for x in self.__conditionTextIncludeList.split(',')])
 
         # Exclude List for Seller info  (see private variables)
-        sellerExcludeSet = set([x.strip() for x in self._sellerTextExcludeList.split(',')])
+        sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
 
         # Exclude List for Delivery  (see private variables)
         deliveryExcludeSet = set([x.strip() for x in self.__deliveryTextExcludeList.split(',')])
@@ -179,20 +190,20 @@ class AllOffersObject(object):
             boolPutInDict = True
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
 
-            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self._PriceMustBeGreaterThan:
+            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['condition'] not in conditoinIncludeSet:
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self._PositiveFeedbackPctMustBeGreaterThan:
+            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
-                print('{}  xxxxxxxxxxxxxxxxxxxxxxxxxxxx {}'.format(self._PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
+                print('{}  xxxxxxxxxxxxx   storeToNestedDict  xxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self._SellerRatingMustBeGreaterThan:
+            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
                 # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
                 boolPutInDict = False
@@ -231,10 +242,12 @@ class AllOffersObject(object):
                     boolFBAExists = True
                     lowestPrice = v['priceTotal']
                     lowestKey = k
+                    print('current lowest key is {}'.format(lowestKey))
 
                 if not boolFBAExists:
                     lowestPrice = v['priceTotal']
                     lowestKey = k
+                    print('current lowest key is {}'.format(lowestKey))
 
         return myDict[lowestKey]
 

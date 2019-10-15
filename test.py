@@ -13,8 +13,7 @@ alloffersObj = AllOffersObject(soup)  # stores the entire soup object to a Class
 alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'
 # print(alloffersDivTxt)
 
-# print(alloffersObj.storeAllOffersToPandas(alloffersDivTxt))
-# combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
+# print(alloffersObj.storeAllOffersToPandas(alloffersDivTxt))+
 # print(combinedDict)
 # lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 # # print('\n\n\n\n\n')
@@ -25,9 +24,10 @@ print(alloffersObj.get_conditionTextIncludeList())
 print(alloffersObj.conditionTextIncludeListProperty)
 alloffersObj.conditionTextIncludeListProperty = 'New'
 print(alloffersObj.conditionTextIncludeListProperty)
-print(alloffersObj.deliveryTextExcludeListx)
-alloffersObj.deliveryTextExcludeListx = 'ccc'
-print(alloffersObj.deliveryTextExcludeListx)
+print(alloffersObj.deliveryTextExcludeList)
+# alloffersObj.deliveryTextExcludeList = 'ccc'
+alloffersObj.setDeliveryTextExcludeList('ccc')
+print(alloffersObj.deliveryTextExcludeList)
 
 # alloffersObj = AllOffersObject(soup)  # stores the entire soup object to a Class to be further filtered
 # alloffrsDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffe'
