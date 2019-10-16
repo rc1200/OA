@@ -236,6 +236,20 @@ class AllOffersObject(object):
         lowestKey = ''
         boolFBAExists = False
 
+        # fake dictionary to ensure something is passed if no matching criteria or issues with Amazon
+        fakeDict = {'fakeDict': {
+            'price': -99,
+            'priceShipping': 0.0,
+            'priceTotal': -99,
+            'condition': 'something wrong happened',
+            'sellerName': 'fakeDict',
+            'sellerPositive': -99,
+            'sellerRating': -99,
+            'seller': 'something wrong happened',
+            'delivery': '',
+            'isFBA': False
+        }}
+
         for k, v in myDict.items():
             if v['priceTotal'] < lowestPrice:
                 if v['isFBA']:
@@ -249,7 +263,12 @@ class AllOffersObject(object):
                     lowestKey = k
                     print('current lowest key is {}'.format(lowestKey))
 
-        return myDict[lowestKey]
+        if myDict:
+            return myDict[lowestKey]
+        else:
+            print('ffffffffffffffff             fakeDict           fffffffffff')
+            print(fakeDict['fakeDict'])
+            return fakeDict['fakeDict']
 
     def sandbox(self, singleObj):
         print(self.getText(self.offersSoup, 'olpOfferPrice'))
