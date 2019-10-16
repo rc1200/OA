@@ -112,7 +112,7 @@ class AllOffersObject(object):
     def getAllDataFromAttrib(self, htmlType=None, attribName=None):
         htmlTypeVal = htmlType if htmlType else 'class'
         attribNameVal = attribName if attribName else 'olpOffer'
-        return self.offersSoup.find_all(attrs={htmlType: attribName})
+        return self.offersSoup.find_all(attrs={htmlTypeVal: attribNameVal})
 
     # safeguad when fetching data if type is NONE ie. there is no text (ie. Shipping olpShippingPrice class)
     def getText(self, sellerDivSoupObj, className):
@@ -255,7 +255,6 @@ class AllOffersObject(object):
         print(self.getText(self.offersSoup, 'olpOfferPrice'))
         print(self.getCategoryDataForOneSeller(self.offersSoup))
         print('ass')
-        print(self.storeToPandas(singleObj))
 
 
 class ObjByClassAttrib(AllOffersObject):

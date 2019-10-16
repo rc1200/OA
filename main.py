@@ -96,5 +96,5 @@ print(myASINList)
 # print(combinedDict)
 
 
-# getBothCAN_US('0133356728')
+# getBothCAN_US('0133356728') # works
 getBothCAN_US('0131194577')
