@@ -49,9 +49,11 @@ def getBothCAN_US(itemNum):
 
     # compareDict = {itemNum: {}}
     compareDict = {}
+    current_k = 0
 
     for k, v in loopDict.items():
         print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
+        current_k += 1
 
         # stores each Item into an amazon Object, first do Canada, then US based on Dict
         myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
@@ -69,9 +71,19 @@ def getBothCAN_US(itemNum):
         #                            'Condition': lowestDict['condition']
         #                            }
 
-        compareDict[k] = {'price': lowestDict['price'],
-                          'Condition': lowestDict['condition']
-                          }
+        # compareDict[k] = {'price': lowestDict['price'],
+        #                   'Condition': lowestDict['condition']
+        #                   }
+
+        if current_k == 1:
+            compareDict[itemNum] = {'price_{}'.format(k): lowestDict['price'],
+                                    'Condition_{}'.format(k): lowestDict['condition']}
+        else:
+            compareDict[itemNum].update({'price_{}'.format(k): lowestDict['price'],
+                                         'Condition_{}'.format(k): lowestDict['condition']})
+
+        print('sdfsssssssss')
+        print(compareDict[itemNum])
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
@@ -96,6 +108,6 @@ print(myASINList)
 # print(combinedDict)
 
 
-getBothCAN_US('0133356728') # issues,
+getBothCAN_US('0133356728')  # issues,
 # getBothCAN_US('0131194577') # works
 # getBothCAN_US('019994184X') # works

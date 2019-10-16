@@ -1,105 +1,18 @@
 import pandas as pd
-import re
-# import requests
-# from bs4 import BeautifulSoup
-from oaSscrape import AMZSoupObject, AllOffersObject
+ronDict = {'0133356728': {'price_canada': 58.7, 'Condition_canada': 'Used - Very Good', 'price_usa': -99, 'Condition_usa': 'something wrong happened'},
+'2222': {'price_canada': 58.7, 'Condition_canada': 'Used - Very Good', 'price_usa': -99, 'Condition_usa': 'something wrong happened'}}
 
 
-ItemNumber = '007738248X'
+# ronDict = {'price1': 58.7, 'Condition1': 'Used - Very Good', 'price2': -99, 'Condition2': 'something wrong happened'}
 
 
-# # ****************  Canada  **************
-# myAmazonObj = AMZSoupObject(ItemNumber, 'ca', 'test.html')
-# soup = myAmazonObj.soupObj()
-
-# alloffersObj = AllOffersObject(soup)  # stores the ENTIRE soup object to a Class to be further filtered
-# alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-# combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
-# lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
-# print(lowestDict)1
+print(ronDict)
 
 
-# # ****************  US  **************
-# myAmazonObj = AMZSoupObject(ItemNumber, 'com', 'testUS.html')
-# soup = myAmazonObj.soupObj()
-
-# alloffersObj = AllOffersObject(soup)  # stores the ENTIRE soup object to a Class to be further filtered
-# alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-# combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
-# lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
-# print(lowestDict)
-
-def urlType(dotCAordotCOM, itemNumber):
-    if dotCAordotCOM.upper() == 'CA':
-        return 'https://www.amazon.ca/gp/offer-listing/{}'.format(itemNumber)
-    elif dotCAordotCOM.upper() == 'COM':
-        return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(itemNumber)
+test = pd.DataFrame.from_dict(ronDict, orient='index')
+print(test)
 
 
-def getBothCAN_US(itemNum):
-
-    # uncomment for testing
-    # loopDict = {'canada': ['ca', 'test.html'],
-    #             'usa': ['com', 'testUS.html']
-    #             }
-
-
-    loopDict = {'canada': ['ca', None],
-                'usa': ['com', None]
-                }
-
-    # # loopDict = {'usa': ['com', 'testUS2.html']}
-    # loopDict = {'usa': ['com', None]}
-
-    # compareDict = {itemNum: {}}
-    compareDict = {}
-
-    for k, v in loopDict.items():
-        print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
-
-        # stores each Item into an amazon Object, first do Canada, then US based on Dict
-        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
-        soup = myAmazonObj.soupObj()
-
-        alloffersObj = AllOffersObject(soup)  # stores the ENTIRE soup object to a Class to be further filtered
-        # alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'} if left blank inside brackets
-        alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-        combinedDict = alloffersObj.getFullSellerDict(alloffersDivTxt)
-        print('xxxxxxxxxxxxxxxxxxxxxxx current combinedDict below will be printed')
-        print(compareDict)
-        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
-        # print(lowestDict)
-        # compareDict[itemNum][k] = {'price': lowestDict['price'],
-        #                            'Condition': lowestDict['condition']
-        #                            }
-
-        compareDict[k] = {'price': lowestDict['price'],
-                          'Condition': lowestDict['condition']
-                          }
-
-    print('********************************* Final combinedDict below will be printed')
-    print(compareDict)
-    return compareDict
-
-
-# myASINList = [ItemNumber, 22222222, 32156, 44444, 555555]
-
-df = pd.read_csv('asin.csv')
-print(df)
-myASINList = df['ASIN'].drop_duplicates().values.tolist()
-print(myASINList)
-
-
-# combinedDict = {}
-# count = 1
-# for i in myASINList:
-#     print(i)
-#     combinedDict[i] = getBothCAN_US(i)
-
-# print('combinedDict ==== ')
-# print(combinedDict)
-
-
-# getBothCAN_US('0133356728') # works
-# getBothCAN_US('0131194577')
-getBothCAN_US('0133356728')
+# data = {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}
+# test = pd.DataFrame.from_dict(data)
+# print(test)
