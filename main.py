@@ -94,10 +94,11 @@ def getBothCAN_US(itemNum):
 
 df = pd.read_csv('asin.csv')
 print(df)
-myASINList = df['ASIN'].drop_duplicates().values.tolist()
+myASINList = df.head(6)['ASIN'].drop_duplicates().values.tolist()
+
 print(myASINList)
 
-myASINList = ['0133356728', '0131194577', '019994184X']
+# myASINList = ['0133356728', '0131194577', '019994184X']
 
 # getBothCAN_US('0133356728')  # issues,
 # getBothCAN_US('0131194577') # works
@@ -123,3 +124,9 @@ for i in myASINList:
 
 print('*************************Final')
 print(df)
+
+
+df = df[(df.ProfitFactor1.between(0,3)) & (df.Condition_usa != 'something wrong happened')]
+print('filtered df')
+print(df)
+
