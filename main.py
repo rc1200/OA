@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import re
 # import requests
@@ -94,7 +95,8 @@ def getBothCAN_US(itemNum):
 
 df = pd.read_csv('asin.csv')
 print(df)
-myASINList = df.head(6)['ASIN'].drop_duplicates().values.tolist()
+# myASINList = df.head(6)['ASIN'].drop_duplicates().values.tolist()
+myASINList = df['ASIN'].drop_duplicates().values.tolist()
 
 print(myASINList)
 
@@ -112,8 +114,12 @@ print(df)
 def passMyDf(myDict):
 
     def pct_gain(x, args=()): return (args - x) / x
+    
+    def getUSConversion(x):
+        return x * 1.33
 
     dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
+    dfTemp["US_ConvertedPrice"] = dfTemp.price_usa.apply(getUSConversion)
     dfTemp["ProfitFactor1"] = pct_gain(dfTemp.price_canada, dfTemp.price_usa).round(2)
     return dfTemp
 
@@ -126,7 +132,10 @@ print('*************************Final')
 print(df)
 
 
-df = df[(df.ProfitFactor1.between(0,3)) & (df.Condition_usa != 'something wrong happened')]
+# df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
 print('filtered df')
 print(df)
+
+today = datetime.today().strftime('%Y-%m-%d')
+df.to_csv(today + '_Result.csv')
 

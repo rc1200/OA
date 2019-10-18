@@ -66,8 +66,8 @@ class AllOffersObject(object):
     """
     # Class Variables, use Setters to change default values
     __PriceMustBeGreaterThan = 1
-    __PositiveFeedbackPctMustBeGreaterThan = 50
-    __SellerRatingMustBeGreaterThan = -10
+    __PositiveFeedbackPctMustBeGreaterThan = 87
+    __SellerRatingMustBeGreaterThan = 34
 
     def __init__(self, offersSoup):
         self.offersSoup = offersSoup
