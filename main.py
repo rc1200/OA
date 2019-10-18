@@ -97,17 +97,29 @@ print(df)
 myASINList = df['ASIN'].drop_duplicates().values.tolist()
 print(myASINList)
 
+myASINList = ['0133356728', '0131194577', '019994184X']
 
-# combinedDict = {}
-# count = 1
-# for i in myASINList:
-#     print(i)
-#     combinedDict[i] = getBothCAN_US(i)
-
-# print('combinedDict ==== ')
-# print(combinedDict)
-
-
-getBothCAN_US('0133356728')  # issues,
+# getBothCAN_US('0133356728')  # issues,
 # getBothCAN_US('0131194577') # works
 # getBothCAN_US('019994184X') # works
+
+
+# initalize Empty Dataframe
+df = pd.DataFrame()
+print(df)
+
+def passMyDf(myDict):
+
+    def pct_gain(x, args=()): return (args - x) / x
+
+    dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
+    dfTemp["ProfitFactor1"] = pct_gain(dfTemp.price_canada, dfTemp.price_usa).round(2)
+    return dfTemp
+
+for i in myASINList:
+    x = passMyDf(getBothCAN_US(i))
+    df= df.append(x)
+
+
+print('*************************Final')
+print(df)
