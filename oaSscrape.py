@@ -66,19 +66,35 @@ class AllOffersObject(object):
     """
     # Class Variables, use Setters to change default values
     __PriceMustBeGreaterThan = 1
-    __PositiveFeedbackPctMustBeGreaterThan = 87
-    __SellerRatingMustBeGreaterThan = 34
+    __PositiveFeedbackPctMustBeGreaterThan = -99 #87
+    __SellerRatingMustBeGreaterThan = -99 #34
 
-    def __init__(self, offersSoup):
+    def __init__(self, offersSoup, USFilter=None):
         self.offersSoup = offersSoup
+        self.USFilter = USFilter
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental, Used - Like New'
+        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
         self.__deliveryTextExcludeList = 'India'
+
+        self.setUsFilters(self.USFilter)
+
+    # change Values if US Prices
+    def setUsFilters(self, v):
+        if v is not None:
+            self.__PriceMustBeGreaterThan = 1
+            self.__PositiveFeedbackPctMustBeGreaterThan = -99 
+            self.__SellerRatingMustBeGreaterThan = -99 
+            self.__conditionTextExcludeList = 'Rental'
+            self.__sellerTextExcludeList = 'xxx'
+            self.__deliveryTextExcludeList = 'xxx'
+
+        return None
+
 
     # Setters for Class Variables
     def setPriceMustBeGreaterThan(self, v):
@@ -173,7 +189,7 @@ class AllOffersObject(object):
         tempPandas.to_csv('exported_to_csv.csv')
         return tempPandas
 
-    def storeToNestedDict(self, sellerObject):
+    def storeToNestedDictFiltered(self, sellerObject):
         nestedDict = {}
         boolPutInDict = True
 
@@ -189,18 +205,20 @@ class AllOffersObject(object):
         for i in sellerObject:
             boolPutInDict = True
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
+            currentConditon = self.getCategoryDataForOneSeller(i)['condition']
+
 
             if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['condition'] in conditoinExcludeSet:
+            if currentConditon in conditoinExcludeSet:
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
-                print('{}  xxxxxxxxxxxxx   storeToNestedDict  xxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
+                print('{}  xxxxxxxxxxxxx   storeToNestedDictFiltered  xxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
@@ -218,20 +236,25 @@ class AllOffersObject(object):
                 if stringMatch in sellerText:
                     boolPutInDict = False
 
+            # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
+            # Special conditon for Rental as we want to ensure we filter that out
+            if sellerName == 'Amazon' and currentConditon != 'Rental' :
+                boolPutInDict = True
+
             if boolPutInDict == True:
                 nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
         return(nestedDict)
 
-    def getFullSellerDict(self, alloffersDivTxt):
-        print(self.storeToNestedDict(alloffersDivTxt))
-        return self.storeToNestedDict(alloffersDivTxt)
-        # combinedDict = self.storeToNestedDict(alloffersDivTxt)
+    def getFullSellerDictFiltered(self, alloffersDivTxt):
+        print(self.storeToNestedDictFiltered(alloffersDivTxt))
+        return self.storeToNestedDictFiltered(alloffersDivTxt)
+        # combinedDict = self.storeToNestedDictFiltered(alloffersDivTxt)
         # return combinedDict
 
     def getLowestPricedObjectBasedOnCriteria(self, myDict):
 
-        # myDict = getFullSellerDict(alloffersDivTxt)
+        # myDict = getFullSellerDictFiltered(alloffersDivTxt)
         lowestPrice = 999999999999999
         lowestKey = ''
         boolFBAExists = False
@@ -287,3 +310,4 @@ class ObjByClassAttrib(AllOffersObject):
 
     def test(self):
         print('this is a test : pass parameter {}'.format(self.classAttrib))
+
