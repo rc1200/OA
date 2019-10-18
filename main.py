@@ -1,6 +1,8 @@
 from datetime import datetime
 import pandas as pd
 import re
+from time import sleep
+
 # import requests
 # from bs4 import BeautifulSoup
 from oaSscrape import AMZSoupObject, AllOffersObject
@@ -96,11 +98,11 @@ def getBothCAN_US(itemNum):
 df = pd.read_csv('asin.csv')
 print(df)
 # myASINList = df.head(6)['ASIN'].drop_duplicates().values.tolist()
-myASINList = df['ASIN'].drop_duplicates().values.tolist()
+# myASINList = df['ASIN'].drop_duplicates().values.tolist()
 
+
+myASINList = ['1455740209']
 print(myASINList)
-
-# myASINList = ['0133356728', '0131194577', '019994184X']
 
 # getBothCAN_US('0133356728')  # issues,
 # getBothCAN_US('0131194577') # works
@@ -126,6 +128,7 @@ def passMyDf(myDict):
 for i in myASINList:
     x = passMyDf(getBothCAN_US(i))
     df= df.append(x)
+    sleep(15) # sleep 5 seconds
 
 
 print('*************************Final')

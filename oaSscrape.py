@@ -74,7 +74,7 @@ class AllOffersObject(object):
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextIncludeList = 'New, Used - Like New, Used - Very Good, Used - Good, Used - Acceptable'
+        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental, Used - Like New'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
@@ -92,10 +92,10 @@ class AllOffersObject(object):
 
     # Option 1 for getter and setter, use variable to call the getter and setter methods and use as a property
     def get_conditionTextIncludeList(self):
-        return self.__conditionTextIncludeList
+        return self.__conditionTextExcludeList
 
     def set_conditionTextIncludeList(self, setter_value):
-        self.__conditionTextIncludeList = setter_value
+        self.__conditionTextExcludeList = setter_value
 
     conditionTextIncludeListProperty = property(get_conditionTextIncludeList, set_conditionTextIncludeList)
 
@@ -178,7 +178,7 @@ class AllOffersObject(object):
         boolPutInDict = True
 
         # INCLUDE List for Condition (see private variables)
-        conditoinIncludeSet = set([x.strip() for x in self.__conditionTextIncludeList.split(',')])
+        conditoinExcludeSet = set([x.strip() for x in self.__conditionTextExcludeList.split(',')])
 
         # Exclude List for Seller info  (see private variables)
         sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
@@ -194,7 +194,7 @@ class AllOffersObject(object):
                 # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
                 boolPutInDict = False
 
-            if self.getCategoryDataForOneSeller(i)['condition'] not in conditoinIncludeSet:
+            if self.getCategoryDataForOneSeller(i)['condition'] in conditoinExcludeSet:
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
