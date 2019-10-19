@@ -30,6 +30,12 @@ class AMZSoupObject(object):
 
     userAgents = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
+    'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
+    'Opera/9.80 (Macintosh; Intel Mac OS X 10.14.1) Presto/2.12.388 Version/12.16',
+    'Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16D57',
+    'Mozilla/5.0 (Linux; Android 9; Pixel 2 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Mobile Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36']
 
     # Adding Random headers to avoid throttling from Amazon
@@ -45,7 +51,8 @@ class AMZSoupObject(object):
         if self.dotCAordotCOM.upper() == 'CA':
             return 'https://www.amazon.ca/gp/offer-listing/{}'.format(self.itemNumber)
         elif self.dotCAordotCOM.upper() == 'COM':
-            return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
+            # return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
+            return 'https://www.amazon.com/gp/offer-listing/{}'.format(self.itemNumber)
 
     def soupObj(self):
         if self.readFromFile is not None:
@@ -86,7 +93,7 @@ class AllOffersObject(object):
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextExcludeList = 'used-acceptablexxx, collectible-acceptable, Rental'
+        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
@@ -207,9 +214,76 @@ class AllOffersObject(object):
         tempPandas.to_csv('exported_to_csv.csv')
         return tempPandas
 
-    def storeToNestedDictFiltered(self, sellerObject):
-        nestedDict = {}
-        boolPutInDict = True
+    # def storeToNestedDictFiltered(self, sellerObject):
+    #     nestedDict = {}
+    #     boolPutInDict = True
+
+    #     # INCLUDE List for Condition (see private variables)
+    #     conditoinExcludeSet = set(
+    #         [x.strip() for x in self.__conditionTextExcludeList.split(',')])
+
+    #     # Exclude List for Seller info  (see private variables)
+    #     sellerExcludeSet = set(
+    #         [x.strip() for x in self.__sellerTextExcludeList.split(',')])
+
+    #     # Exclude List for Delivery  (see private variables)
+    #     deliveryExcludeSet = set(
+    #         [x.strip() for x in self.__deliveryTextExcludeList.split(',')])
+
+    #     for i in sellerObject:
+    #         boolPutInDict = True
+    #         sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
+    #         currentConditon = self.getCategoryDataForOneSeller(i)['condition']
+
+    #         if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
+    #             # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
+    #             boolPutInDict = False
+
+    #         if currentConditon in conditoinExcludeSet:
+    #             boolPutInDict = False
+
+    #         if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
+    #             # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
+    #             # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
+    #             print('{}  xxxxxxxxxxxxx   storeToNestedDictFiltered  xxxxxxxxxxxxxxx {}'.format(
+    #                 self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
+    #             boolPutInDict = False
+
+    #         if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
+    #             # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
+    #             # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
+    #             boolPutInDict = False
+
+    #         deliveryText = self.getCategoryDataForOneSeller(i)['delivery']
+    #         for stringMatch in deliveryExcludeSet:
+    #             if stringMatch in deliveryText:
+    #                 boolPutInDict = False
+
+    #         sellerText = self.getCategoryDataForOneSeller(i)['seller']
+    #         for stringMatch in sellerExcludeSet:
+    #             if stringMatch in sellerText:
+    #                 boolPutInDict = False
+
+    #         # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
+    #         # Special conditon for Rental as we want to ensure we filter that out
+    #         if sellerName == 'Amazon' and currentConditon != 'Rentalxxx':
+    #             boolPutInDict = True
+
+    #         boolPutInDict = True
+           
+    #         if boolPutInDict == True:
+    #             nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
+
+    #     return(nestedDict)
+
+
+
+
+
+
+    def filterCriteria(self, dict):
+
+        boolCriteria = True
 
         # INCLUDE List for Condition (see private variables)
         conditoinExcludeSet = set(
@@ -223,61 +297,65 @@ class AllOffersObject(object):
         deliveryExcludeSet = set(
             [x.strip() for x in self.__deliveryTextExcludeList.split(',')])
 
-        for i in sellerObject:
-            boolPutInDict = True
-            sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
-            currentConditon = self.getCategoryDataForOneSeller(i)['condition']
+        currentConditon = dict['condition']
 
-            if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
-                # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
-                boolPutInDict = False
+        if dict['priceTotal'] < self.__PriceMustBeGreaterThan:
+            boolCriteria = False
 
-            if currentConditon in conditoinExcludeSet:
-                boolPutInDict = False
+        if currentConditon in conditoinExcludeSet:
+            boolCriteria = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
-                # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
-                # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
-                print('{}  xxxxxxxxxxxxx   storeToNestedDictFiltered  xxxxxxxxxxxxxxx {}'.format(
-                    self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
-                boolPutInDict = False
+        if dict['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
+            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
+            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
+            boolCriteria = False
 
-            if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
-                # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
-                # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
-                boolPutInDict = False
+        if dict['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
+            # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
+            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
+            boolCriteria = False
 
-            deliveryText = self.getCategoryDataForOneSeller(i)['delivery']
-            for stringMatch in deliveryExcludeSet:
-                if stringMatch in deliveryText:
-                    boolPutInDict = False
+        deliveryText = dict['delivery']
+        for stringMatch in deliveryExcludeSet:
+            if stringMatch in deliveryText:
+                boolCriteria = False
 
-            sellerText = self.getCategoryDataForOneSeller(i)['seller']
-            for stringMatch in sellerExcludeSet:
-                if stringMatch in sellerText:
-                    boolPutInDict = False
+        sellerText = dict['seller']
+        for stringMatch in sellerExcludeSet:
+            if stringMatch in sellerText:
+                boolCriteria = False
 
             # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
             # Special conditon for Rental as we want to ensure we filter that out
-            if sellerName == 'Amazon' and currentConditon != 'Rental':
-                boolPutInDict = True
 
-           
-            if boolPutInDict == True:
-                nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
+            # if dict['sellerName'] == 'Amazon' and currentConditon != 'Rentalxxx':
+            #     boolCriteria = True
+
+        print('the value of boolCriteria is {}'.format(boolCriteria))
+        return(boolCriteria)
+
+
+
+
+
+
+    def storeToNestedDict(self, sellerObject):
+        nestedDict = {}
+
+        for i in sellerObject:
+            sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
+            nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
         return(nestedDict)
 
-    def getFullSellerDictFiltered(self, alloffersDivTxt):
-        print(self.storeToNestedDictFiltered(alloffersDivTxt))
-        return self.storeToNestedDictFiltered(alloffersDivTxt)
-        # combinedDict = self.storeToNestedDictFiltered(alloffersDivTxt)
-        # return combinedDict
+    def getAllSellerDict(self, alloffersDivTxt):
+        return self.storeToNestedDict(alloffersDivTxt)
 
     def getLowestPricedObjectBasedOnCriteria(self, myDict):
 
-        # myDict = getFullSellerDictFiltered(alloffersDivTxt)
+        # Gets lowest Price whth overide on FBA, FBA typically American only
         lowestPrice = 999999999999999
+        lowestPriceFloor = 999999999999999
         lowestKey = ''
         boolFBAExists = False
 
@@ -292,23 +370,31 @@ class AllOffersObject(object):
             'sellerRating': -99,
             'seller': 'something wrong happened',
             'delivery': '',
-            'isFBA': False
+            'isFBA': False,
+            'lowestPriceFloor' : 999,
         }}
 
         for k, v in myDict.items():
-            if v['priceTotal'] < lowestPrice:
-                if v['isFBA']:
-                    boolFBAExists = True
-                    lowestPrice = v['priceTotal']
-                    lowestKey = k
-                    print('current lowest key is {}'.format(lowestKey))
 
-                if not boolFBAExists:
-                    lowestPrice = v['priceTotal']
-                    lowestKey = k
-                    print('current lowest key is {}'.format(lowestKey))
+            if v['priceTotal'] < lowestPriceFloor:
+                lowestPriceFloor = v['priceTotal']                  
+
+            if self.filterCriteria(v) or k.upper() == 'AMAZON':
+
+                if (v['priceTotal'] < lowestPrice):
+                    if v['isFBA']:
+                        boolFBAExists = True
+                        lowestPrice = v['priceTotal']
+                        lowestKey = k
+                        print('current lowest key is {}'.format(lowestKey))
+
+                    if not boolFBAExists:
+                        lowestPrice = v['priceTotal']                    
+                        lowestKey = k
+                        print('current lowest key is {}'.format(lowestKey))
 
         if myDict:
+            myDict[lowestKey]['lowestPriceFloor'] = lowestPriceFloor
             return myDict[lowestKey]
         else:
             print('ffffffffffffffff             fakeDict           fffffffffff')

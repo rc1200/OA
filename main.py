@@ -70,8 +70,8 @@ def getBothCAN_US(itemNum):
 df_asin = pd.read_csv('asin.csv')
 print(df_asin)
 # myASINList = df_asin.head(6)['ASIN'].drop_duplicates().values.tolist()
-myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-# myASINList = ['1455740209']
+# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+myASINList = ['0847826694']
 print(myASINList)
 
 # initalize Empty Dataframe
@@ -80,14 +80,16 @@ print(df)
 
 def dictToDF(myDict):
 
-    def pct_gain(x, args=()): return (args - x) / x
+    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return ( (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
     
     def getUSConversion(x):
         return x * 1.33
 
     dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
     dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(getUSConversion)
-    dfTemp["ProfitFactor"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa).round(2)
+    dfTemp["ProfitFactor"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,0).round(2)
+    dfTemp["PF_10pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,10).round(2)
+    dfTemp["PF_15pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,15).round(2)
     return dfTemp
 
 

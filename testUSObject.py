@@ -8,19 +8,23 @@ from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '0071834443'
-# getBothCAN_US('0133356728')  # issues,
-# getBothCAN_US('0131194577') # works
-# getBothCAN_US('019994184X') # works
+ItemNumber = '0500841152'
 
 # # ****************  Canada  **************
 # myAmazonObj = AMZSoupObject(ItemNumber, 'ca', 'test.html')
 myAmazonObj = AMZSoupObject(ItemNumber, 'com', None)
 soup = myAmazonObj.soupObj()
 
+
+# with open('testSoup.html', 'w', encoding='utf-8') as f_out:
+#     f_out.write(soup.prettify())
+#     f_out.close()
+
+
 alloffersObj = AllOffersObject(soup, 'ApplyUSFilter')  # stores the ENTIRE soup object to a Class to be further filtered
-alloffersDivTxt = alloffersObj.getAllDataFromAttrib()  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-combinedDict = alloffersObj.getFullSellerDictFiltered(alloffersDivTxt)
+# alloffersObj = AllOffersObject(soup, None)  # stores the ENTIRE soup object to a Class to be further filtered
+alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
 
 print('**************************  print Dict  **************************')
 print(combinedDict)
