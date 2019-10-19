@@ -12,7 +12,7 @@ ItemNumber = '007738248X'
 
 
 def getBothCAN_US(itemNum):
-
+    
     # uncomment for testing
     # loopDict = {'canada': ['ca', 'test.html'],
     #             'usa': ['com', 'testUS.html']
@@ -23,11 +23,9 @@ def getBothCAN_US(itemNum):
                 }
 
     compareDict = {}
-    current_k = 0
 
     for k, v in loopDict.items():
         print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
-        current_k += 1
 
         # stores each Item into an amazon Object, first do Canada, then US based on Dict
         myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
@@ -38,12 +36,22 @@ def getBothCAN_US(itemNum):
         combinedDict = alloffersObj.getFullSellerDictFiltered(alloffersDivTxt)
         lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 
-        if current_k == 1:
-            compareDict[itemNum] = {'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+        # if current_k == 1:
+        #     compareDict[itemNum] = {'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+        #                             'Condition_{}'.format(k): lowestDict['condition']}
+        # else:
+        #     compareDict[itemNum].update({'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+        #                                  'Condition_{}'.format(k): lowestDict['condition']})
+
+        if k == 'canada':
+            compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
+                                    'priceTotal_{}'.format(k): lowestDict['priceTotal'],
                                     'Condition_{}'.format(k): lowestDict['condition']}
         else:
-            compareDict[itemNum].update({'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-                                         'Condition_{}'.format(k): lowestDict['condition']})
+            compareDict[itemNum].update({'Seller_{}'.format(k): lowestDict['sellerName'],
+                                         'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+                                         'Condition_{}'.format(k): lowestDict['condition'],
+                                         'is_FBA_{}'.format(k): lowestDict['isFBA']})
 
 
     print('********************************* Final combinedDict below will be printed')
@@ -60,8 +68,8 @@ def getBothCAN_US(itemNum):
 df_asin = pd.read_csv('asin.csv')
 print(df_asin)
 # myASINList = df_asin.head(6)['ASIN'].drop_duplicates().values.tolist()
-# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-myASINList = ['1455740209']
+myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+# myASINList = ['1455740209']
 print(myASINList)
 
 # initalize Empty Dataframe
@@ -76,8 +84,8 @@ def dictToDF(myDict):
         return x * 1.33
 
     dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
-    dfTemp["US_ConvertedPrice"] = dfTemp.priceTotal_usa.apply(getUSConversion)
-    dfTemp["ProfitFactor1"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa).round(2)
+    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(getUSConversion)
+    dfTemp["ProfitFactor"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa).round(2)
     return dfTemp
 
 
@@ -85,7 +93,7 @@ for i in myASINList:
     x = dictToDF(getBothCAN_US(i))
     print(x)
     df= df.append(x)
-    sleep(5) # sleep 5 seconds
+    sleep(10) # sleep 5 seconds
 
 
 print(' ****************** Non filtered DF ***************')
