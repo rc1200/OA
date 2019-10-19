@@ -24,7 +24,8 @@ class AMZSoupObject(object):
     '''
 
     # constant for all classes
-    HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    HEADERS = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
     def __init__(self, itemNumber, dotCAordotCOM, readFromFile=None):
         self.itemNumber = itemNumber
@@ -42,7 +43,8 @@ class AMZSoupObject(object):
             # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             print('Reading from file')
-            return BeautifulSoup(open(self.readFromFile), 'lxml')  # note for some reason html.parser was not getting all the data
+            # note for some reason html.parser was not getting all the data
+            return BeautifulSoup(open(self.readFromFile), 'lxml')
         else:
             response = requests.get(self.urlType(), headers=self.HEADERS)
 
@@ -66,8 +68,8 @@ class AllOffersObject(object):
     """
     # Class Variables, use Setters to change default values
     __PriceMustBeGreaterThan = 1
-    __PositiveFeedbackPctMustBeGreaterThan = -99 #87
-    __SellerRatingMustBeGreaterThan = -99 #34
+    __PositiveFeedbackPctMustBeGreaterThan = -99  # 87
+    __SellerRatingMustBeGreaterThan = -99  # 34
 
     def __init__(self, offersSoup, USFilter=None):
         self.offersSoup = offersSoup
@@ -75,7 +77,7 @@ class AllOffersObject(object):
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental'
+        self.__conditionTextExcludeList = 'used-acceptablexxx, collectible-acceptable, Rental'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
@@ -87,16 +89,16 @@ class AllOffersObject(object):
     def setUsFilters(self, v):
         if v is not None:
             self.__PriceMustBeGreaterThan = 1
-            self.__PositiveFeedbackPctMustBeGreaterThan = -99 
-            self.__SellerRatingMustBeGreaterThan = -99 
+            self.__PositiveFeedbackPctMustBeGreaterThan = -99
+            self.__SellerRatingMustBeGreaterThan = -99
             self.__conditionTextExcludeList = 'Rental'
-            self.__sellerTextExcludeList = 'xxx'
-            self.__deliveryTextExcludeList = 'xxx'
+            self.__sellerTextExcludeList = 'xazxx'
+            self.__deliveryTextExcludeList = 'xazxx'
 
         return None
 
-
     # Setters for Class Variables
+
     def setPriceMustBeGreaterThan(self, v):
         self.__PriceMustBeGreaterThan = v
 
@@ -113,7 +115,8 @@ class AllOffersObject(object):
     def set_conditionTextIncludeList(self, setter_value):
         self.__conditionTextExcludeList = setter_value
 
-    conditionTextIncludeListProperty = property(get_conditionTextIncludeList, set_conditionTextIncludeList)
+    conditionTextIncludeListProperty = property(
+        get_conditionTextIncludeList, set_conditionTextIncludeList)
 
     # Option 2, explictly using decorators
     @property
@@ -151,14 +154,19 @@ class AllOffersObject(object):
 
     def getCategoryDataForOneSeller(self, offer_list_index):
 
-        price = self.getPriceOnly(self.getText(offer_list_index, 'olpOfferPrice'))
+        price = self.getPriceOnly(self.getText(
+            offer_list_index, 'olpOfferPrice'))
         # price = float(extractViaRegex(getText(offer_list_index, 'olpOfferPrice'), '(\d+\.?\d+)', '0'))
-        priceShipping = self.getPriceOnly(self.getText(offer_list_index, 'olpShippingPrice'))
+        priceShipping = self.getPriceOnly(
+            self.getText(offer_list_index, 'olpShippingPrice'))
         allSellerInfo = self.getText(offer_list_index, 'olpSellerColumn')
-        sellerName = self.extractViaRegex(allSellerInfo, '^(.*)\n.*', 1, 'Amazon')
-        sellerPositive = int(self.extractViaRegex(allSellerInfo, '(\d+)%', 1, '0'))
+        sellerName = self.extractViaRegex(
+            allSellerInfo, '^(.*)\n.*', 1, 'Amazon')
+        sellerPositive = int(self.extractViaRegex(
+            allSellerInfo, '(\d+)%', 1, '0'))
         # sellerRating = extractViaRegex(allSellerInfo, '(\d+,?\d+)\stotal ratings', 1, '0')
-        sellerRating = int(self.extractViaRegex(allSellerInfo, '(\d?,?\d+)\stotal ratings', 1, '0').replace(',', ''))
+        sellerRating = int(self.extractViaRegex(
+            allSellerInfo, '(\d?,?\d+)\stotal ratings', 1, '0').replace(',', ''))
         delivery = self.getText(offer_list_index, 'olpDeliveryColumn')
         isFBA = False
         if 'Fulfillment by Amazon' in delivery:
@@ -183,7 +191,8 @@ class AllOffersObject(object):
         tempPandas = pd.DataFrame()
         for i in allOffers:
             if self.getCategoryDataForOneSeller(i):
-                tempPandas = tempPandas.append(self.getCategoryDataForOneSeller(i), ignore_index=True)
+                tempPandas = tempPandas.append(
+                    self.getCategoryDataForOneSeller(i), ignore_index=True)
 
         # export the data into a csv file
         tempPandas.to_csv('exported_to_csv.csv')
@@ -194,19 +203,21 @@ class AllOffersObject(object):
         boolPutInDict = True
 
         # INCLUDE List for Condition (see private variables)
-        conditoinExcludeSet = set([x.strip() for x in self.__conditionTextExcludeList.split(',')])
+        conditoinExcludeSet = set(
+            [x.strip() for x in self.__conditionTextExcludeList.split(',')])
 
         # Exclude List for Seller info  (see private variables)
-        sellerExcludeSet = set([x.strip() for x in self.__sellerTextExcludeList.split(',')])
+        sellerExcludeSet = set(
+            [x.strip() for x in self.__sellerTextExcludeList.split(',')])
 
         # Exclude List for Delivery  (see private variables)
-        deliveryExcludeSet = set([x.strip() for x in self.__deliveryTextExcludeList.split(',')])
+        deliveryExcludeSet = set(
+            [x.strip() for x in self.__deliveryTextExcludeList.split(',')])
 
         for i in sellerObject:
             boolPutInDict = True
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
             currentConditon = self.getCategoryDataForOneSeller(i)['condition']
-
 
             if self.getCategoryDataForOneSeller(i)['priceTotal'] < self.__PriceMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['priceTotal'] < 1:
@@ -218,7 +229,8 @@ class AllOffersObject(object):
             if self.getCategoryDataForOneSeller(i)['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
                 # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
-                print('{}  xxxxxxxxxxxxx   storeToNestedDictFiltered  xxxxxxxxxxxxxxx {}'.format(self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
+                print('{}  xxxxxxxxxxxxx   storeToNestedDictFiltered  xxxxxxxxxxxxxxx {}'.format(
+                    self.__PositiveFeedbackPctMustBeGreaterThan, self.getCategoryDataForOneSeller(i)['sellerPositive']))
                 boolPutInDict = False
 
             if self.getCategoryDataForOneSeller(i)['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
@@ -238,9 +250,10 @@ class AllOffersObject(object):
 
             # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
             # Special conditon for Rental as we want to ensure we filter that out
-            if sellerName == 'Amazon' and currentConditon != 'Rental' :
+            if sellerName == 'Amazon' and currentConditon != 'Rental':
                 boolPutInDict = True
 
+           
             if boolPutInDict == True:
                 nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
@@ -310,4 +323,3 @@ class ObjByClassAttrib(AllOffersObject):
 
     def test(self):
         print('this is a test : pass parameter {}'.format(self.classAttrib))
-
