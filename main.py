@@ -34,7 +34,7 @@ def getBothCAN_US(itemNum):
 
         alloffersObj = AllOffersObject(soup, v[2]) # stores the ENTIRE soup object to a Class to be further filtered
         alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-        combinedDict = alloffersObj.getFullSellerDictFiltered(alloffersDivTxt)
+        combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
         lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 
         # if current_k == 1:
@@ -71,7 +71,7 @@ df_asin = pd.read_csv('asin.csv')
 print(df_asin)
 # myASINList = df_asin.head(6)['ASIN'].drop_duplicates().values.tolist()
 # myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-myASINList = ['0847826694']
+myASINList = ['0500841152']
 print(myASINList)
 
 # initalize Empty Dataframe
