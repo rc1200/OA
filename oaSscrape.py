@@ -1,4 +1,5 @@
 import pandas as pd
+import random 
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -24,8 +25,16 @@ class AMZSoupObject(object):
     '''
 
     # constant for all classes
+
+
+
+    userAgents = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36']
+
+    # Adding Random headers to avoid throttling from Amazon
     HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+        'User-Agent': random.choice(userAgents)}
 
     def __init__(self, itemNumber, dotCAordotCOM, readFromFile=None):
         self.itemNumber = itemNumber

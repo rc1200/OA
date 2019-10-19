@@ -8,7 +8,7 @@ from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '1455740209'
+ItemNumber = '1284128350'
 
 
 # # ****************  Canada  **************

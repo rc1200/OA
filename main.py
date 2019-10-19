@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+import random
 import re
 from time import sleep
 
@@ -52,7 +53,8 @@ def getBothCAN_US(itemNum):
                                          'priceTotal_{}'.format(k): lowestDict['priceTotal'],
                                          'Condition_{}'.format(k): lowestDict['condition'],
                                          'is_FBA_{}'.format(k): lowestDict['isFBA']})
-
+        
+        randomSleep([3,5,6])
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
@@ -89,11 +91,21 @@ def dictToDF(myDict):
     return dfTemp
 
 
+def randomSleep(myList=None):
+    # Adding Random sleep times to avoid throttling from Amazon
+    sleepTimesSeconds = [5,12,17,24]
+    if myList:
+        sleepTimesSeconds = myList
+    
+    sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
+
 for i in myASINList:
     x = dictToDF(getBothCAN_US(i))
     print(x)
     df= df.append(x)
-    sleep(10) # sleep 5 seconds
+    randomSleep()
+    
+
 
 
 print(' ****************** Non filtered DF ***************')

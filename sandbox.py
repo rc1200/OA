@@ -1,11 +1,15 @@
-L1 = [2,3,4]
-L2 = [1,2]
+
+import random 
+
+def randomSleep(myList=None):
+    # Adding Random sleep times to avoid throttling from Amazon
+    sleepTimesSeconds = [5,12,17,24]
+    if myList:
+        sleepTimesSeconds = myList
+    
+    # sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
+    print(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
 
 
-S1 = set(L1)
-S2 = set(L2)
-
-if S1.intersection(S2):
-    print('within')
-else:
-    print('not within')
+for i in range(6):
+    randomSleep([4,6,1])
