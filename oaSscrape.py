@@ -325,13 +325,6 @@ class AllOffersObject(object):
             if stringMatch in sellerText:
                 boolCriteria = False
 
-            # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
-            # Special conditon for Rental as we want to ensure we filter that out
-
-            # if dict['sellerName'] == 'Amazon' and currentConditon != 'Rentalxxx':
-            #     boolCriteria = True
-
-        print('the value of boolCriteria is {}'.format(boolCriteria))
         return(boolCriteria)
 
 
@@ -379,6 +372,8 @@ class AllOffersObject(object):
             if v['priceTotal'] < lowestPriceFloor:
                 lowestPriceFloor = v['priceTotal']                  
 
+            # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
+            # Special conditon for Rental as we want to ensure we filter that out
             if self.filterCriteria(v) or k.upper() == 'AMAZON':
 
                 if (v['priceTotal'] < lowestPrice):
