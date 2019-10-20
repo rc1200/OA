@@ -8,11 +8,11 @@ from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '0500841152'
+ItemNumber = '1506330207'
 
 # # ****************  Canada  **************
-# myAmazonObj = AMZSoupObject(ItemNumber, 'ca', 'test.html')
-myAmazonObj = AMZSoupObject(ItemNumber, 'com', None)
+myAmazonObj = AMZSoupObject(ItemNumber, 'com', 'tempUS.html')
+# myAmazonObj = AMZSoupObject(ItemNumber, 'com', None)
 soup = myAmazonObj.soupObj()
 
 

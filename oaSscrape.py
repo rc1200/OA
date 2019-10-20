@@ -2,8 +2,10 @@ import pandas as pd
 import random 
 import re
 import requests
-from bs4 import BeautifulSoup
+import time
 
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 class AMZSoupObject(object):
 
@@ -54,13 +56,32 @@ class AMZSoupObject(object):
             # return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
             return 'https://www.amazon.com/gp/offer-listing/{}'.format(self.itemNumber)
 
+
+    def saveToFile(self, CanOrUS,url):
+        
+        driver = webdriver.Chrome()
+        driver.get(url)
+        time.sleep(5)
+
+        fileNameDict = {
+            'ca': 'tempCan.html',
+            'com': 'tempUS.html'
+        }
+
+        with open(fileNameDict.get(CanOrUS), 'w', encoding="utf-8") as f:
+            f.write(driver.page_source)
+
+
+
+
     def soupObj(self):
         if self.readFromFile is not None:
+            self.saveToFile(self.dotCAordotCOM,self.urlType())
             # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             print('Reading from file')
             # note for some reason html.parser was not getting all the data
-            return BeautifulSoup(open(self.readFromFile), 'lxml')
+            return BeautifulSoup(open(self.readFromFile, encoding="utf-8"), 'lxml')
         else:
             response = requests.get(self.urlType(), headers=self.HEADERS)
 

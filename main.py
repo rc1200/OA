@@ -15,13 +15,13 @@ ItemNumber = '007738248X'
 def getBothCAN_US(itemNum):
     
     # uncomment for testing
-    # loopDict = {'canada': ['ca', 'test.html'],
-    #             'usa': ['com', 'testUS.html']
-    #             }
-
-    loopDict = {'canada': ['ca', None, None],
-                'usa': ['com', None, 'ApplyUSFilter']
+    loopDict = {'canada': ['ca', 'tempCan.html', None],
+                'usa': ['com', 'tempUS.html', 'ApplyUSFilter']
                 }
+
+    # loopDict = {'canada': ['ca', None, None],
+    #             'usa': ['com', None, 'ApplyUSFilter']
+    #             }
 
     compareDict = {}
 
@@ -54,7 +54,8 @@ def getBothCAN_US(itemNum):
                                          'Condition_{}'.format(k): lowestDict['condition'],
                                          'is_FBA_{}'.format(k): lowestDict['isFBA']})
         
-        randomSleep([3,5,6])
+        # randomSleep([3,5,6])
+        randomSleep([0])
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
@@ -95,16 +96,19 @@ def dictToDF(myDict):
 
 def randomSleep(myList=None):
     # Adding Random sleep times to avoid throttling from Amazon
-    sleepTimesSeconds = [5,12,17,24]
+    # sleepTimesSeconds = [5,12,17,24]
+    sleepTimesSeconds = [0]
     if myList:
         sleepTimesSeconds = myList
     
     sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
 
+today = datetime.today().strftime('%Y-%m-%d')
 for i in myASINList:
     x = dictToDF(getBothCAN_US(i))
     print(x)
     df= df.append(x)
+    df.to_csv(today + '_Result.csv')
     randomSleep()
     
 
@@ -117,6 +121,5 @@ print(df)
 # print('filtered df')
 # print(df)
 
-today = datetime.today().strftime('%Y-%m-%d')
-df.to_csv(today + '_Result.csv')
+
 
