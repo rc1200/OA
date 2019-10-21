@@ -9,7 +9,7 @@ from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '007738248X'
+ItemNumber = '1118886143'
 
 
 def getBothCAN_US(itemNum):
@@ -72,8 +72,8 @@ def getBothCAN_US(itemNum):
 df_asin = pd.read_csv('asin.csv')
 print(df_asin)
 # myASINList = df_asin.head(3)['ASIN'].drop_duplicates().values.tolist()
-myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-# myASINList = ['0134093410']
+# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+myASINList = ['1118886143']
 print(myASINList)
 
 # initalize Empty Dataframe

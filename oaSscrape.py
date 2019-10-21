@@ -355,10 +355,18 @@ class AllOffersObject(object):
 
     def storeToNestedDict(self, sellerObject):
         nestedDict = {}
+        occDictCnt = {}
 
         for i in sellerObject:
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
-            nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
+            sellerList = [k for k,v in nestedDict.items()]
+            occurance = sellerList.count(sellerName)
+            if occurance > 0:
+                r = re.compile(sellerName)
+                sellerNameOccurance = len(list(filter(r.match, sellerList)) )         
+                nestedDict[sellerName + str(sellerNameOccurance)] = self.getCategoryDataForOneSeller(i)
+            else:
+                nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
         return(nestedDict)
 

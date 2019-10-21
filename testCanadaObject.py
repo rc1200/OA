@@ -12,6 +12,7 @@ ItemNumber = '0133769402'
 
 # # ****************  Canada  **************
 myAmazonObj = AMZSoupObject(ItemNumber, 'ca', 'tempCan.html')
+print(myAmazonObj.urlType())
 # myAmazonObj = AMZSoupObject(ItemNumber, 'ca', None)
 soup = myAmazonObj.soupObj()
 
