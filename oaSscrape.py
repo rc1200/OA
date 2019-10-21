@@ -53,8 +53,8 @@ class AMZSoupObject(object):
         if self.dotCAordotCOM.upper() == 'CA':
             return 'https://www.amazon.ca/gp/offer-listing/{}'.format(self.itemNumber)
         elif self.dotCAordotCOM.upper() == 'COM':
-            # return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
-            return 'https://www.amazon.com/gp/offer-listing/{}'.format(self.itemNumber)
+            return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
+            # return 'https://www.amazon.com/gp/offer-listing/{}'.format(self.itemNumber)
 
 
     def saveToFile(self, CanOrUS,url):
@@ -114,7 +114,7 @@ class AllOffersObject(object):
 
         # Private Varables N.B. Keep hard coded, add methon to update later
         # INCLUDE List for Condition
-        self.__conditionTextExcludeList = 'used-acceptable, collectible-acceptable, Rental'
+        self.__conditionTextExcludeList = 'used - acceptable, collectible - acceptable, Rental'
         # Exclude List for Seller info
         self.__sellerTextExcludeList = 'Just Launched'
         # Exclude List for Delivery
@@ -308,40 +308,40 @@ class AllOffersObject(object):
 
         # INCLUDE List for Condition (see private variables)
         conditoinExcludeSet = set(
-            [x.strip() for x in self.__conditionTextExcludeList.split(',')])
+            [x.strip().upper() for x in self.__conditionTextExcludeList.split(',')])
 
         # Exclude List for Seller info  (see private variables)
         sellerExcludeSet = set(
-            [x.strip() for x in self.__sellerTextExcludeList.split(',')])
+            [x.strip().upper() for x in self.__sellerTextExcludeList.split(',')])
 
         # Exclude List for Delivery  (see private variables)
         deliveryExcludeSet = set(
-            [x.strip() for x in self.__deliveryTextExcludeList.split(',')])
+            [x.strip().upper() for x in self.__deliveryTextExcludeList.split(',')])
 
-        currentConditon = dict['condition']
+        currentConditon = dict['condition'].upper()
 
         if dict['priceTotal'] < self.__PriceMustBeGreaterThan:
             boolCriteria = False
 
-        if currentConditon in conditoinExcludeSet:
-            boolCriteria = False
-
         if dict['sellerPositive'] < self.__PositiveFeedbackPctMustBeGreaterThan:
-            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] != 'sdsd':
-            # if self.getCategoryDataForOneSeller(i)['sellerPositive'] < 0:
             boolCriteria = False
 
         if dict['sellerRating'] < self.__SellerRatingMustBeGreaterThan:
-            # if self.getCategoryDataForOneSeller(i)['sellerRating'] < 0:
-            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxx', self.getCategoryDataForOneSeller(i)['sellerRating'])
             boolCriteria = False
 
-        deliveryText = dict['delivery']
+        # Allows Amazon sellers to show up since they don't have any rating, but could still be filtered via conditon ie. Rental etc..
+        if dict['sellerName'].upper() == 'AMAZON':
+            boolCriteria = True
+
+        if currentConditon in conditoinExcludeSet:
+            boolCriteria = False
+
+        deliveryText = dict['delivery'].upper()
         for stringMatch in deliveryExcludeSet:
             if stringMatch in deliveryText:
                 boolCriteria = False
 
-        sellerText = dict['seller']
+        sellerText = dict['seller'].upper()
         for stringMatch in sellerExcludeSet:
             if stringMatch in sellerText:
                 boolCriteria = False
@@ -390,12 +390,13 @@ class AllOffersObject(object):
 
         for k, v in myDict.items():
 
-            if v['priceTotal'] < lowestPriceFloor:
+            # bug for lowest floor as it doesn't include any filters
+            if v['priceTotal'] < lowestPriceFloor and v['condition'].upper() != 'RENTAL':
                 lowestPriceFloor = v['priceTotal']                  
 
             # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
             # Special conditon for Rental as we want to ensure we filter that out
-            if self.filterCriteria(v) or k.upper() == 'AMAZON':
+            if self.filterCriteria(v):
 
                 if (v['priceTotal'] < lowestPrice):
                     if v['isFBA']:
@@ -409,7 +410,7 @@ class AllOffersObject(object):
                         lowestKey = k
                         print('current lowest key is {}'.format(lowestKey))
 
-        if myDict:
+        if myDict and lowestKey != '':
             myDict[lowestKey]['lowestPriceFloor'] = lowestPriceFloor
             return myDict[lowestKey]
         else:

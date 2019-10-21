@@ -8,10 +8,11 @@ from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '1506330207'
+ItemNumber = '1118886143'
 
-# # ****************  Canada  **************
+# # ****************  US  **************
 myAmazonObj = AMZSoupObject(ItemNumber, 'com', 'tempUS.html')
+print(myAmazonObj.urlType())
 # myAmazonObj = AMZSoupObject(ItemNumber, 'com', None)
 soup = myAmazonObj.soupObj()
 
@@ -26,8 +27,8 @@ alloffersObj = AllOffersObject(soup, 'ApplyUSFilter')  # stores the ENTIRE soup 
 alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
 combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
 
-print('**************************  print Dict  **************************')
+print('**************************  print Dict  **************************\n')
 print(combinedDict)
-print('**************************  done print Dict  **************************')
+print('\n**************************  done print Dict  **************************')
 lowestDictPriceObject = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 print(lowestDictPriceObject)

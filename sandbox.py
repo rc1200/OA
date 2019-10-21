@@ -1,21 +1,6 @@
-import time
-from selenium import webdriver
-url = 'https://www.amazon.com/gp/offer-listing/1506330207'
+from datetime import datetime
+from time import sleep
 
 
-
-def saveToFile(CanOrUS,url):
-
-    driver = webdriver.Chrome()
-    driver.get(url)
-    time.sleep(2)
-
-    fileNameDict = {
-        '.ca': 'tempCan.html',
-        '.com': 'tempUS.html'
-    }
-
-    with open(fileNameDict.get(CanOrUS), 'w') as f:
-        f.write(driver.page_source)
-
-saveToFile('.com',url)
+if 1 == 1 and 2 == 2:
+    print('no brackets')

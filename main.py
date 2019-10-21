@@ -52,7 +52,8 @@ def getBothCAN_US(itemNum):
             compareDict[itemNum].update({'Seller_{}'.format(k): lowestDict['sellerName'],
                                          'priceTotal_{}'.format(k): lowestDict['priceTotal'],
                                          'Condition_{}'.format(k): lowestDict['condition'],
-                                         'is_FBA_{}'.format(k): lowestDict['isFBA']})
+                                         'is_FBA_{}'.format(k): lowestDict['isFBA'],
+                                         'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
         
         # randomSleep([3,5,6])
         randomSleep([0])
@@ -70,9 +71,9 @@ def getBothCAN_US(itemNum):
 
 df_asin = pd.read_csv('asin.csv')
 print(df_asin)
-# myASINList = df_asin.head(6)['ASIN'].drop_duplicates().values.tolist()
-# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-myASINList = ['0500841152']
+# myASINList = df_asin.head(3)['ASIN'].drop_duplicates().values.tolist()
+myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+# myASINList = ['0134093410']
 print(myASINList)
 
 # initalize Empty Dataframe
@@ -104,6 +105,8 @@ def randomSleep(myList=None):
     sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
 
 today = datetime.today().strftime('%Y-%m-%d')
+timeStart = datetime.now()
+
 for i in myASINList:
     x = dictToDF(getBothCAN_US(i))
     print(x)
@@ -111,11 +114,16 @@ for i in myASINList:
     df.to_csv(today + '_Result.csv')
     randomSleep()
     
-
-
-
 print(' ****************** Non filtered DF ***************')
 print(df)
+
+timeEnd = datetime.now()
+totalMin = timeEnd - timeStart
+
+print('Start Time:  {}'.format(timeStart))
+print('End Time:  {}'.format(timeEnd))
+print('Total Time:  {}'.format(totalMin))
+
 
 # df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
 # print('filtered df')
