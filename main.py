@@ -70,10 +70,10 @@ def getBothCAN_US(itemNum):
 
 
 df_asin = pd.read_csv('asin.csv')
-print(df_asin)
+# print(df_asin)
 # myASINList = df_asin.head(3)['ASIN'].drop_duplicates().values.tolist()
-# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-myASINList = ['1118886143']
+myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+myASINList = ['1337406295']
 print(myASINList)
 
 # initalize Empty Dataframe

@@ -1,49 +1,135 @@
 from datetime import datetime
+import pandas as pd
+import random
+import re
 from time import sleep
 
-
-myDict =  {1: {'Name': 'a'},
-2: {'Name' : 'b'},
-3: {'Name' : 'a'}
-}
-x = [v['Name'] for k,v in myDict.items()]
-print(x)
-occurance = x.count('a')
-print(occurance)
-
-# # print(myDict)
-
-# def test(mydict):
-#     nestedDict = {}
-
-#     for k,v in myDict.items():
-#         x = [v for k,v in nestedDict.items()]
-#         print (k, v)
-#         if v in x:
-#             countOcc = x.count(v)
-#             print(countOcc)
-#             nestedDict[v + str(countOcc)] = v
-#         else:
-#             nestedDict[v] = v
-
-#     print (nestedDict)
-#     return nestedDict
-
-# test(myDict)
+# import requests
+# from bs4 import BeautifulSoup
+from oaSscrape import AMZSoupObject, AllOffersObject
 
 
+ItemNumber = '1118886143'
 
-import re
 
-#Check if the string starts with "The" and ends with "Spain":
+def getBothCAN_US(itemNum):
+    
+    # uncomment for testing
+    loopDict = {'canada': ['ca', 'tempCan.html', None],
+                'usa': ['com', 'tempUS.html', 'ApplyUSFilter']
+                }
 
-import re
+    # loopDict = {'canada': ['ca', None, None],
+    #             'usa': ['com', None, 'ApplyUSFilter']
+    #             }
 
-mylist = ["dog", "cat", "wildcat", "thundercat", "cow", "hooo"]
-print ('mylist.count("dog")')
-print (mylist.count("dog"))
-r = re.compile(".*cat")
-newlist = list(filter(r.match, mylist)) # Read Note
-print(len(newlist))
-if newlist:
-    print('something in list')
+    compareDict = {}
+
+    for k, v in loopDict.items():
+        print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
+
+        # stores each Item into an amazon Object, first do Canada, then US based on Dict
+        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
+        soup = myAmazonObj.soupObj()
+
+        alloffersObj = AllOffersObject(soup, v[2]) # stores the ENTIRE soup object to a Class to be further filtered
+        alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
+        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
+
+        # if current_k == 1:
+        #     compareDict[itemNum] = {'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+        #                             'Condition_{}'.format(k): lowestDict['condition']}
+        # else:
+        #     compareDict[itemNum].update({'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+        #                                  'Condition_{}'.format(k): lowestDict['condition']})
+
+        if k == 'canada':
+            compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
+                                    'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+                                    'Condition_{}'.format(k): lowestDict['condition']}
+        else:
+            compareDict[itemNum].update({'Seller_{}'.format(k): lowestDict['sellerName'],
+                                         'priceTotal_{}'.format(k): lowestDict['priceTotal'],
+                                         'Condition_{}'.format(k): lowestDict['condition'],
+                                         'is_FBA_{}'.format(k): lowestDict['isFBA'],
+                                         'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
+        
+        # randomSleep([3,5,6])
+        randomSleep([0])
+
+    print('********************************* Final combinedDict below will be printed')
+    print(compareDict)
+    return compareDict
+
+
+
+
+
+
+
+
+df_asin = pd.read_csv('asin.csv')
+# print(df_asin)
+myASINList = df_asin.head(5)['ASIN'].drop_duplicates().values.tolist()
+# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
+# myASINList = ['1118886143']
+myASINList2 = df_asin.head(5)['ASIN'].drop_duplicates().values.tolist()
+print(myASINList)
+
+# initalize Empty Dataframe
+df = pd.DataFrame()
+df2 = pd.DataFrame()
+# print(df)
+
+def dictToDF(myDict):
+
+    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return ( (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
+    
+    def getUSConversion(x):
+        return x * 1.33
+
+    dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
+    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(getUSConversion)
+    dfTemp["ProfitFactor"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,0).round(2)
+    dfTemp["PF_10pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,10).round(2)
+    dfTemp["PF_15pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,15).round(2)
+    return dfTemp
+
+
+def randomSleep(myList=None):
+    # Adding Random sleep times to avoid throttling from Amazon
+    # sleepTimesSeconds = [5,12,17,24]
+    sleepTimesSeconds = [0]
+    if myList:
+        sleepTimesSeconds = myList
+    
+    sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
+
+today = datetime.today().strftime('%Y-%m-%d')
+timeStart = datetime.now()
+
+for i in myASINList:
+    x = dictToDF(getBothCAN_US(i))
+    print(x)
+    df= df.append(x)
+    df.to_csv(today + '_Result.csv')
+    randomSleep()
+    
+print(' ****************** Non filtered DF ***************')
+print(df)
+
+timeEnd = datetime.now()
+totalMin = timeEnd - timeStart
+
+print('Start Time:  {}'.format(timeStart))
+print('End Time:  {}'.format(timeEnd))
+print('Total Time:  {}'.format(totalMin))
+
+
+# df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
+# print('filtered df')
+# print(df)
+
+
+
