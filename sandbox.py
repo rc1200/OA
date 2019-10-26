@@ -3,25 +3,29 @@ import pandas as pd
 import random
 import re
 from time import sleep
-
-# import requests
-# from bs4 import BeautifulSoup
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '1118886143'
+# ********************************************
 
+df_asin1 = pd.read_csv('asin.csv')
+df_asin2 = pd.read_csv('asin.csv')
+myASINList1 = df_asin1.head(3)['ASIN'].drop_duplicates().values.tolist()
+myASINList2 = df_asin2.head(3)['ASIN'].drop_duplicates().values.tolist()
+# myASINList1 = df_asin['ASIN'].drop_duplicates().values.tolist()
+# myASINList2 = ['1337406295']
+
+# initalize Empty Dataframe
+df1 = pd.DataFrame()
+df2 = pd.DataFrame()
+
+# ********************************************
 
 def getBothCAN_US(itemNum):
     
-    # uncomment for testing
     loopDict = {'canada': ['ca', 'tempCan.html', None],
                 'usa': ['com', 'tempUS.html', 'ApplyUSFilter']
                 }
-
-    # loopDict = {'canada': ['ca', None, None],
-    #             'usa': ['com', None, 'ApplyUSFilter']
-    #             }
 
     compareDict = {}
 
@@ -37,12 +41,6 @@ def getBothCAN_US(itemNum):
         combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
         lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
 
-        # if current_k == 1:
-        #     compareDict[itemNum] = {'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-        #                             'Condition_{}'.format(k): lowestDict['condition']}
-        # else:
-        #     compareDict[itemNum].update({'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-        #                                  'Condition_{}'.format(k): lowestDict['condition']})
 
         if k == 'canada':
             compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
@@ -65,22 +63,6 @@ def getBothCAN_US(itemNum):
 
 
 
-
-
-
-
-df_asin = pd.read_csv('asin.csv')
-# print(df_asin)
-myASINList = df_asin.head(5)['ASIN'].drop_duplicates().values.tolist()
-# myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-# myASINList = ['1118886143']
-myASINList2 = df_asin.head(5)['ASIN'].drop_duplicates().values.tolist()
-print(myASINList)
-
-# initalize Empty Dataframe
-df = pd.DataFrame()
-df2 = pd.DataFrame()
-# print(df)
 
 def dictToDF(myDict):
 
@@ -106,18 +88,31 @@ def randomSleep(myList=None):
     
     sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
 
+
+
+def saveToFile(myASINList, myDf, fileNameExtensionName='_Result.csv'):
+
+    for i in myASINList:
+        x = dictToDF(getBothCAN_US(i))
+        print(x)
+        myDf= myDf.append(x)
+        myDf.to_csv(today + fileNameExtensionName)
+        randomSleep()
+
+    print(' ****************** Non filtered DF ***************')
+    print(myDf)
+
+
+
+
+
+
+
 today = datetime.today().strftime('%Y-%m-%d')
 timeStart = datetime.now()
 
-for i in myASINList:
-    x = dictToDF(getBothCAN_US(i))
-    print(x)
-    df= df.append(x)
-    df.to_csv(today + '_Result.csv')
-    randomSleep()
-    
-print(' ****************** Non filtered DF ***************')
-print(df)
+saveToFile(myASINList1, df1, '_Result1.csv')
+saveToFile(myASINList1, df1, '_Result2.csv')
 
 timeEnd = datetime.now()
 totalMin = timeEnd - timeStart
