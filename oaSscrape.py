@@ -1,11 +1,12 @@
 import pandas as pd
-import random 
+import random
 import re
 import requests
 import time
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
 
 class AMZSoupObject(object):
 
@@ -28,17 +29,15 @@ class AMZSoupObject(object):
 
     # constant for all classes
 
-
-
     userAgents = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
-    'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
-    'Opera/9.80 (Macintosh; Intel Mac OS X 10.14.1) Presto/2.12.388 Version/12.16',
-    'Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16D57',
-    'Mozilla/5.0 (Linux; Android 9; Pixel 2 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Mobile Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36']
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362',
+                  'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
+                  'Opera/9.80 (Macintosh; Intel Mac OS X 10.14.1) Presto/2.12.388 Version/12.16',
+                  'Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14',
+                  'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Mobile/15E148 Safari/604.1',
+                  'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16D57',
+                  'Mozilla/5.0 (Linux; Android 9; Pixel 2 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Mobile Safari/537.36',
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36']
 
     # Adding Random headers to avoid throttling from Amazon
     HEADERS = {
@@ -56,30 +55,26 @@ class AMZSoupObject(object):
             return 'https://www.amazon.com/gp/offer-listing/{}/ref=olp_f_primeEligible?f_primeEligible=true'.format(self.itemNumber)
             # return 'https://www.amazon.com/gp/offer-listing/{}'.format(self.itemNumber)
 
+    def saveToFile(self, FileName, url):
 
-    def saveToFile(self, CanOrUS,url):
-        
         driver = webdriver.Chrome()
         driver.get(url)
-        time.sleep(5)
+        # time.sleep(5)
 
-        fileNameDict = {
-            'ca': 'tempCan.html',
-            'com': 'tempUS.html'
-        }
+        # fileNameDict = {
+        #     'ca': 'tempCan.html',
+        #     'com': 'tempUS.html'
+        # }
 
-        with open(fileNameDict.get(CanOrUS), 'w', encoding="utf-8") as f:
+        with open(FileName, 'w', encoding="utf-8") as f:
             f.write(driver.page_source)
-
-
-
 
     def soupObj(self):
         if self.readFromFile is not None:
-            self.saveToFile(self.dotCAordotCOM,self.urlType())
+            self.saveToFile(self.readFromFile, self.urlType())
             # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
             # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
-            print('Reading from file')
+            print('Reading from file {}'.format(self.readFromFile))
             # note for some reason html.parser was not getting all the data
             return BeautifulSoup(open(self.readFromFile, encoding="utf-8"), 'lxml')
         else:
@@ -291,16 +286,11 @@ class AllOffersObject(object):
     #             boolPutInDict = True
 
     #         boolPutInDict = True
-           
+
     #         if boolPutInDict == True:
     #             nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
     #     return(nestedDict)
-
-
-
-
-
 
     def filterCriteria(self, dict):
 
@@ -348,23 +338,19 @@ class AllOffersObject(object):
 
         return(boolCriteria)
 
-
-
-
-
-
     def storeToNestedDict(self, sellerObject):
         nestedDict = {}
         occDictCnt = {}
 
         for i in sellerObject:
             sellerName = self.getCategoryDataForOneSeller(i)['sellerName']
-            sellerList = [k for k,v in nestedDict.items()]
+            sellerList = [k for k, v in nestedDict.items()]
             occurance = sellerList.count(sellerName)
             if occurance > 0:
                 r = re.compile(sellerName)
-                sellerNameOccurance = len(list(filter(r.match, sellerList)) )         
-                nestedDict[sellerName + str(sellerNameOccurance)] = self.getCategoryDataForOneSeller(i)
+                sellerNameOccurance = len(list(filter(r.match, sellerList)))
+                nestedDict[sellerName + str(sellerNameOccurance)
+                           ] = self.getCategoryDataForOneSeller(i)
             else:
                 nestedDict[sellerName] = self.getCategoryDataForOneSeller(i)
 
@@ -393,14 +379,14 @@ class AllOffersObject(object):
             'seller': 'something wrong happened',
             'delivery': '',
             'isFBA': False,
-            'lowestPriceFloor' : 999,
+            'lowestPriceFloor': 999,
         }}
 
         for k, v in myDict.items():
 
             # bug for lowest floor as it doesn't include any filters
             if v['priceTotal'] < lowestPriceFloor and v['condition'].upper() != 'RENTAL':
-                lowestPriceFloor = v['priceTotal']                  
+                lowestPriceFloor = v['priceTotal']
 
             # Amazon Seller Hidden Gem - normally gets filtered out due to no ratings
             # Special conditon for Rental as we want to ensure we filter that out
@@ -414,7 +400,7 @@ class AllOffersObject(object):
                         print('current lowest key is {}'.format(lowestKey))
 
                     if not boolFBAExists:
-                        lowestPrice = v['priceTotal']                    
+                        lowestPrice = v['priceTotal']
                         lowestKey = k
                         print('current lowest key is {}'.format(lowestKey))
 

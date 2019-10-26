@@ -2,26 +2,39 @@ from datetime import datetime
 import pandas as pd
 import random
 import re
+import threading
 from time import sleep
-
-# import requests
-# from bs4 import BeautifulSoup
 from oaSscrape import AMZSoupObject, AllOffersObject
 
 
-ItemNumber = '1118886143'
+# ********************************************
+
+df_asin1 = pd.read_csv('asin.csv')
+df_asin2 = pd.read_csv('asin.csv')
+myFullASINList = df_asin2['ASIN'].drop_duplicates().values.tolist()
+
+# myASINList1 = df_asin1.head(1)['ASIN'].drop_duplicates().values.tolist()
+# myASINList2 = df_asin2.head(1)['ASIN'].drop_duplicates().values.tolist()
+
+# myASINList1 = df_asin2.iloc[0:3].drop_duplicates().values.tolist()
+# myASINList2 = df_asin2.iloc[4:9].drop_duplicates().values.tolist()
+myASINList1 = myFullASINList[1:20]
+myASINList2 = myFullASINList[21:44]
+# myASINList1 = df_asin['ASIN'].drop_duplicates().values.tolist()
+# myASINList2 = ['1337406295']
+
+# initalize Empty Dataframe
+df1 = pd.DataFrame()
+df2 = pd.DataFrame()
+
+# ********************************************
 
 
-def getBothCAN_US(itemNum):
-    
-    # uncomment for testing
-    loopDict = {'canada': ['ca', 'tempCan.html', None],
-                'usa': ['com', 'tempUS.html', 'ApplyUSFilter']
+def getBothCAN_US(itemNum, threadNum):
+
+    loopDict = {'canada': ['ca', 'tempCan{}.html'.format(threadNum), None],
+                'usa': ['com', 'tempUS{}.html'.format(threadNum), 'ApplyUSFilter']
                 }
-
-    # loopDict = {'canada': ['ca', None, None],
-    #             'usa': ['com', None, 'ApplyUSFilter']
-    #             }
 
     compareDict = {}
 
@@ -32,17 +45,14 @@ def getBothCAN_US(itemNum):
         myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
         soup = myAmazonObj.soupObj()
 
-        alloffersObj = AllOffersObject(soup, v[2]) # stores the ENTIRE soup object to a Class to be further filtered
-        alloffersDivTxt = alloffersObj.getAllDataFromAttrib('class', 'olpOffer')  # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        # stores the ENTIRE soup object to a Class to be further filtered
+        alloffersObj = AllOffersObject(soup, v[2])
+        # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
+        alloffersDivTxt = alloffersObj.getAllDataFromAttrib(
+            'class', 'olpOffer')
         combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
-        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(combinedDict)
-
-        # if current_k == 1:
-        #     compareDict[itemNum] = {'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-        #                             'Condition_{}'.format(k): lowestDict['condition']}
-        # else:
-        #     compareDict[itemNum].update({'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-        #                                  'Condition_{}'.format(k): lowestDict['condition']})
+        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(
+            combinedDict)
 
         if k == 'canada':
             compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
@@ -54,7 +64,7 @@ def getBothCAN_US(itemNum):
                                          'Condition_{}'.format(k): lowestDict['condition'],
                                          'is_FBA_{}'.format(k): lowestDict['isFBA'],
                                          'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
-        
+
         # randomSleep([3,5,6])
         randomSleep([0])
 
@@ -63,35 +73,23 @@ def getBothCAN_US(itemNum):
     return compareDict
 
 
-
-
-
-
-
-
-df_asin = pd.read_csv('asin.csv')
-# print(df_asin)
-# myASINList = df_asin.head(3)['ASIN'].drop_duplicates().values.tolist()
-myASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-myASINList = ['1337406295']
-print(myASINList)
-
-# initalize Empty Dataframe
-df = pd.DataFrame()
-print(df)
-
 def dictToDF(myDict):
 
-    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return ( (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
-    
+    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return (
+        (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
+
     def getUSConversion(x):
         return x * 1.33
 
     dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
-    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(getUSConversion)
-    dfTemp["ProfitFactor"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,0).round(2)
-    dfTemp["PF_10pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,10).round(2)
-    dfTemp["PF_15pctBelow"] = pct_gain(dfTemp.priceTotal_canada, dfTemp.priceTotal_usa,15).round(2)
+    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(
+        getUSConversion)
+    dfTemp["ProfitFactor"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 0).round(2)
+    dfTemp["PF_10pctBelow"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 10).round(2)
+    dfTemp["PF_15pctBelow"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 15).round(2)
     return dfTemp
 
 
@@ -101,21 +99,46 @@ def randomSleep(myList=None):
     sleepTimesSeconds = [0]
     if myList:
         sleepTimesSeconds = myList
-    
-    sleep(random.choice(sleepTimesSeconds)) # sleep rando seconds seconds
+
+    sleep(random.choice(sleepTimesSeconds))  # sleep rando seconds seconds
+
+
+def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv'):
+
+    for i in myASINList:
+        x = dictToDF(getBothCAN_US(i, threadNum))
+        print(x)
+        myDf = myDf.append(x)
+        myDf.to_csv(today + fileNameExtensionName)
+        randomSleep()
+
+    print(' ****************** Non filtered DF ***************')
+    print(myDf)
+
 
 today = datetime.today().strftime('%Y-%m-%d')
 timeStart = datetime.now()
 
-for i in myASINList:
-    x = dictToDF(getBothCAN_US(i))
-    print(x)
-    df= df.append(x)
-    df.to_csv(today + '_Result.csv')
-    randomSleep()
-    
-print(' ****************** Non filtered DF ***************')
-print(df)
+
+# Create new threads
+thread1 = threading.Thread(target=saveToFile, args=(myASINList1, 1, df1, '_Result1.csv'))
+thread2 = threading.Thread(target=saveToFile, args=(myASINList2, 2, df2, '_Result2.csv'))
+
+
+thread1.start()
+thread2.start()
+# Start new Threads
+# threads = []
+# for i in range(1):
+#     t = threading.Thread(target=saveToFile, args=(myASINList1, i, df1, '_Result1.csv'))
+#     threads.append(t)
+#     t.start()
+
+# saveToFile(myASINList1, 1, df1, '_Result1.csv')
+# saveToFile(myASINList1,2, df2, '_Result2.csv')
+
+thread1.join()
+thread2.join()
 
 timeEnd = datetime.now()
 totalMin = timeEnd - timeStart
@@ -128,6 +151,3 @@ print('Total Time:  {}'.format(totalMin))
 # df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
 # print('filtered df')
 # print(df)
-
-
-
