@@ -9,23 +9,31 @@ from oaSscrape import AMZSoupObject, AllOffersObject
 
 # ********************************************
 
-df_asin1 = pd.read_csv('asin.csv')
-df_asin2 = pd.read_csv('asin.csv')
-myFullASINList = df_asin2['ASIN'].drop_duplicates().values.tolist()
+df_asin = pd.read_csv('asin.csv')
+myFullASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
 
-# myASINList1 = df_asin1.head(1)['ASIN'].drop_duplicates().values.tolist()
-# myASINList2 = df_asin2.head(1)['ASIN'].drop_duplicates().values.tolist()
+# RM - get a function to create the iterator based on the threading cap vs using N value
+# ie. getSliceCnt
+n = 5
+# initalize empty lists
+asinSubList = [[] for _ in range(n)]
+dfList = [pd.DataFrame() for _ in range(n)]
+thread = [[] for _ in range(n)]
 
-# myASINList1 = df_asin2.iloc[0:3].drop_duplicates().values.tolist()
-# myASINList2 = df_asin2.iloc[4:9].drop_duplicates().values.tolist()
-myASINList1 = myFullASINList[1:20]
-myASINList2 = myFullASINList[21:44]
-# myASINList1 = df_asin['ASIN'].drop_duplicates().values.tolist()
-# myASINList2 = ['1337406295']
+# RM - create function to or maybe even class to create lists
+startNum = 1
+recordsPerList = 2
+endNum = startNum + recordsPerList
 
-# initalize Empty Dataframe
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
+for i in range(n):
+    asinSubList[i] = myFullASINList[ startNum : endNum]
+    startNum = endNum
+    endNum = startNum + recordsPerList
+
+# asinSubList[1] = myFullASINList[101:200]
+# asinSubList[2] = myFullASINList[201:300]
+# asinSubList[3] = myFullASINList[301:400]
+# asinSubList[4] = myFullASINList[401:500]
 
 # ********************************************
 
@@ -108,9 +116,15 @@ def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv')
     for i in myASINList:
         x = dictToDF(getBothCAN_US(i, threadNum))
         print(x)
-        myDf = myDf.append(x)
-        myDf.to_csv(today + fileNameExtensionName)
-        randomSleep()
+
+        x.to_csv(today + fileNameExtensionName, mode='a', header=False)
+
+
+        # myDf = myDf.append(x)
+
+        # No need anymore as we are append to file now so DF is technically not needed
+        # myDf.to_csv(today + fileNameExtensionName)
+        # randomSleep()
 
     print(' ****************** Non filtered DF ***************')
     print(myDf)
@@ -119,26 +133,18 @@ def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv')
 today = datetime.today().strftime('%Y-%m-%d')
 timeStart = datetime.now()
 
-
+testThreadCnt = n
 # Create new threads
-thread1 = threading.Thread(target=saveToFile, args=(myASINList1, 1, df1, '_Result1.csv'))
-thread2 = threading.Thread(target=saveToFile, args=(myASINList2, 2, df2, '_Result2.csv'))
+threads = []
+for i in range(testThreadCnt):
+    t = threading.Thread(target=saveToFile, args=(asinSubList[i], i, dfList[i], '_Result{}.csv'.format(i)))
+    threads.append(t)
 
-
-thread1.start()
-thread2.start()
 # Start new Threads
-# threads = []
-# for i in range(1):
-#     t = threading.Thread(target=saveToFile, args=(myASINList1, i, df1, '_Result1.csv'))
-#     threads.append(t)
-#     t.start()
+[t.start() for t in threads]
+# wait for all threads before proceeding
+[t.join() for t in threads]
 
-# saveToFile(myASINList1, 1, df1, '_Result1.csv')
-# saveToFile(myASINList1,2, df2, '_Result2.csv')
-
-thread1.join()
-thread2.join()
 
 timeEnd = datetime.now()
 totalMin = timeEnd - timeStart
