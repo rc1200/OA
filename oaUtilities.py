@@ -80,12 +80,6 @@ def getBothCAN_US(itemNum, threadNum, isTest):
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
-    for k,v in compareDict.items():
-        print (k)
-        print (v)
-        for i in v.items():
-            print(i)
-
     return compareDict
 
 
@@ -129,3 +123,12 @@ def saveToFile(myASINList, threadNum, todaysDate, fileNameExtensionName='_Result
 
     print(' ****************** Non filtered DF ***************')
     print(x)
+
+
+
+def combineCsvToOneFile (allCsvFiles, headers, NewFileName):
+    
+    combined_csv_to_Pandas = pd.concat([pd.read_csv(f,names=headers) for f in allCsvFiles ])
+    print('combinging csv and writing to new file')
+    print(combined_csv_to_Pandas.head())
+    combined_csv_to_Pandas.to_csv( NewFileName, index=False, encoding='utf-8-sig')

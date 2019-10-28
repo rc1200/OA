@@ -5,7 +5,7 @@ import re
 import threading
 from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
-from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF, saveToFile
+from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF, saveToFile, combineCsvToOneFile
 
 
 # ********************************************
@@ -13,9 +13,9 @@ from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF
 df_asin = pd.read_csv('asin.csv')
 myFullASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
 
-numOfLists = 1
+numOfLists = 5
 startNum = 1
-recordsPerList = 2
+recordsPerList = 100
 
 # initalize empty lists
 asinSubList = [[] for _ in range(numOfLists)]
@@ -35,7 +35,7 @@ timeStart = datetime.now()
 # Create new threads and append to list
 threads = []
 for i in range(numOfLists):
-    t = threading.Thread(target=saveToFile, args=(asinSubList[i], i, today, '_Result{}.csv'.format(i), True))
+    t = threading.Thread(target=saveToFile, args=(asinSubList[i], i, today, '_Result{}.csv'.format(i), False))
         # def saveToFile(myASINList, threadNum, todaysDate, fileNameExtensionName='_Result.csv', isTest):
         # -> see oaUtilities.py for details
     threads.append(t)
@@ -49,15 +49,22 @@ for i in range(numOfLists):
 timeEnd = datetime.now()
 totalMin = timeEnd - timeStart
 
-# Headers
-# ASIN, Seller_canada,priceTotal_canada, Condition_canada,Seller_usa, priceTotal_usa, Condition_usa,is_FBA_usa,lowestPriceFloorusa
-
-# RM - Combine all the .csv file and store to 1 file
-# also extract header
 
 print('Start Time:  {}'.format(timeStart))
 print('End Time:  {}'.format(timeEnd))
 print('Total Time:  {}'.format(totalMin))
+
+
+# ***********************   combine all csv files  **********************************
+
+allCsvFiles = ['{}_Result{}.csv'.format(today,i) for i in range(numOfLists)]
+print(allCsvFiles)
+headers =  ['ASIN', 'Seller_canada','priceTotal_canada', 'Condition_canada','Seller_usa', 'priceTotal_usa', 'Condition_usa',
+    'is_FBA_usa','lowestPriceFloorusa','US_ConvertedPriceTo_CAD','ProfitFactor','PF_10pctBelow','PF_15pctBelow']
+
+combineCsvToOneFile(allCsvFiles, headers, 'combinedCSV.csv')
+
+# ***********************   combine all csv files  **********************************
 
 
 # df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
