@@ -5,6 +5,7 @@ import re
 import threading
 from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
+from oaUtilities import randomSleep, splitIntoListArray
 
 
 # ********************************************
@@ -17,23 +18,14 @@ myFullASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
 n = 5
 # initalize empty lists
 asinSubList = [[] for _ in range(n)]
-dfList = [pd.DataFrame() for _ in range(n)]
+dfList = [pd.DataFrame() for _ in range(n)]  # May not need as we are appendint o csv file
 thread = [[] for _ in range(n)]
 
 # RM - create function to or maybe even class to create lists
 startNum = 1
-recordsPerList = 2
-endNum = startNum + recordsPerList
+recordsPerList = 100
 
-for i in range(n):
-    asinSubList[i] = myFullASINList[ startNum : endNum]
-    startNum = endNum
-    endNum = startNum + recordsPerList
-
-# asinSubList[1] = myFullASINList[101:200]
-# asinSubList[2] = myFullASINList[201:300]
-# asinSubList[3] = myFullASINList[301:400]
-# asinSubList[4] = myFullASINList[401:500]
+splitIntoListArray(myFullASINList, asinSubList, 5, 1, 100)
 
 # ********************************************
 
@@ -74,7 +66,7 @@ def getBothCAN_US(itemNum, threadNum):
                                          'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
 
         # randomSleep([3,5,6])
-        randomSleep([0])
+        # randomSleep([2])
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
@@ -101,14 +93,7 @@ def dictToDF(myDict):
     return dfTemp
 
 
-def randomSleep(myList=None):
-    # Adding Random sleep times to avoid throttling from Amazon
-    # sleepTimesSeconds = [5,12,17,24]
-    sleepTimesSeconds = [0]
-    if myList:
-        sleepTimesSeconds = myList
 
-    sleep(random.choice(sleepTimesSeconds))  # sleep rando seconds seconds
 
 
 def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv'):
@@ -119,10 +104,8 @@ def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv')
 
         x.to_csv(today + fileNameExtensionName, mode='a', header=False)
 
-
-        # myDf = myDf.append(x)
-
         # No need anymore as we are append to file now so DF is technically not needed
+        # myDf = myDf.append(x)
         # myDf.to_csv(today + fileNameExtensionName)
         # randomSleep()
 

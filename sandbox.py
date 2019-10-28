@@ -5,6 +5,7 @@ import re
 import threading
 from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
+from oaUtilities import randomSleep, splitIntoListArray
 
 
 # ********************************************
@@ -25,127 +26,12 @@ startNum = 1
 recordsPerList = 100
 endNum = startNum + recordsPerList
 
-for i in range(n):
-    asinSubList[i] = myFullASINList[ startNum : endNum]
-    startNum = endNum
-    endNum = startNum + recordsPerList
+
 
 # ********************************************
 
+splitIntoListArray(myFullASINList, asinSubList, 5, 1, 100)
 
-def getBothCAN_US(itemNum, threadNum):
-
-    loopDict = {'canada': ['ca', 'tempCan{}.html'.format(threadNum), None],
-                'usa': ['com', 'tempUS{}.html'.format(threadNum), 'ApplyUSFilter']
-                }
-
-    compareDict = {}
-
-    for k, v in loopDict.items():
-        print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
-
-        # stores each Item into an amazon Object, first do Canada, then US based on Dict
-        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
-        soup = myAmazonObj.soupObj()
-
-        # stores the ENTIRE soup object to a Class to be further filtered
-        alloffersObj = AllOffersObject(soup, v[2])
-        # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-        alloffersDivTxt = alloffersObj.getAllDataFromAttrib(
-            'class', 'olpOffer')
-        combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
-        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(
-            combinedDict)
-
-        if k == 'canada':
-            compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
-                                    'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-                                    'Condition_{}'.format(k): lowestDict['condition']}
-        else:
-            compareDict[itemNum].update({'Seller_{}'.format(k): lowestDict['sellerName'],
-                                         'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-                                         'Condition_{}'.format(k): lowestDict['condition'],
-                                         'is_FBA_{}'.format(k): lowestDict['isFBA'],
-                                         'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
-
-        # randomSleep([3,5,6])
-        # randomSleep([2])
-
-    print('********************************* Final combinedDict below will be printed')
-    print(compareDict)
-    return compareDict
-
-
-def dictToDF(myDict):
-
-    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return (
-        (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
-
-    def getUSConversion(x):
-        return x * 1.33
-
-    dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
-    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(
-        getUSConversion)
-    dfTemp["ProfitFactor"] = pct_gain(
-        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 0).round(2)
-    dfTemp["PF_10pctBelow"] = pct_gain(
-        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 10).round(2)
-    dfTemp["PF_15pctBelow"] = pct_gain(
-        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 15).round(2)
-    return dfTemp
-
-
-def randomSleep(myList=None):
-    # Adding Random sleep times to avoid throttling from Amazon
-    sleepTimesSeconds = [5,12,17,24]
-    if myList:
-        sleepTimesSeconds = myList
-
-    sleep(random.choice(sleepTimesSeconds))  # sleep rando seconds seconds
-
-
-def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv'):
-
-    for i in myASINList:
-        x = dictToDF(getBothCAN_US(i, threadNum))
-        print(x)
-
-        x.to_csv(today + fileNameExtensionName, mode='a', header=False)
-
-        # No need anymore as we are append to file now so DF is technically not needed
-        # myDf = myDf.append(x)
-        # myDf.to_csv(today + fileNameExtensionName)
-        # randomSleep()
-
-    print(' ****************** Non filtered DF ***************')
-    print(myDf)
-
-
-today = datetime.today().strftime('%Y-%m-%d')
-timeStart = datetime.now()
-
-testThreadCnt = n
-# Create new threads
-threads = []
-for i in range(testThreadCnt):
-    t = threading.Thread(target=saveToFile, args=(asinSubList[i], i, dfList[i], '_Result{}.csv'.format(i)))
-    threads.append(t)
-
-# Start new Threads
-[t.start() for t in threads]
-# wait for all threads before proceeding
-[t.join() for t in threads]
-
-
-timeEnd = datetime.now()
-totalMin = timeEnd - timeStart
-
-print('Start Time:  {}'.format(timeStart))
-print('End Time:  {}'.format(timeEnd))
-print('Total Time:  {}'.format(totalMin))
-
-
-# df = df[(df.ProfitFactor1.between(-66,33)) & (df.Condition_usa != 'something wrong happened')]
-# print('filtered df')
-# print(df)
+for i in asinSubList:
+    print(i)
+    print('\n\n\n')
