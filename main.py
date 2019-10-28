@@ -49,6 +49,12 @@ for i in range(numOfLists):
 timeEnd = datetime.now()
 totalMin = timeEnd - timeStart
 
+# Headers
+# ASIN, Seller_canada,priceTotal_canada, Condition_canada,Seller_usa, priceTotal_usa, Condition_usa,is_FBA_usa,lowestPriceFloorusa
+
+# RM - Combine all the .csv file and store to 1 file
+# also extract header
+
 print('Start Time:  {}'.format(timeStart))
 print('End Time:  {}'.format(timeEnd))
 print('Total Time:  {}'.format(totalMin))

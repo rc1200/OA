@@ -80,6 +80,12 @@ def getBothCAN_US(itemNum, threadNum, isTest):
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
+    for k,v in compareDict.items():
+        print (k)
+        print (v)
+        for i in v.items():
+            print(i)
+
     return compareDict
 
 
