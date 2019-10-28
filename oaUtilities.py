@@ -1,3 +1,4 @@
+import pandas as pd
 import random
 from oaSscrape import AMZSoupObject, AllOffersObject
 from time import sleep
@@ -39,7 +40,7 @@ def splitIntoListArray (sourceList, splitListArray, rangeVal, start, recordsPerL
 
 
 
-def getBothCAN_US(itemNum, threadNum):
+def getBothCAN_US(itemNum, threadNum, isTest):
     
     loopDict = {'canada': ['ca', 'tempCan{}.html'.format(threadNum), None],
                 'usa': ['com', 'tempUS{}.html'.format(threadNum), 'ApplyUSFilter']
@@ -51,7 +52,7 @@ def getBothCAN_US(itemNum, threadNum):
         print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
 
         # stores each Item into an amazon Object, first do Canada, then US based on Dict
-        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1], True)
+        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1], isTest)
         soup = myAmazonObj.soupObj()
 
         # stores the ENTIRE soup object to a Class to be further filtered
@@ -80,3 +81,45 @@ def getBothCAN_US(itemNum, threadNum):
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
     return compareDict
+
+
+
+
+
+def dictToDF(myDict):
+
+    def pct_gain(CAD_Price, US_Price, USpctReduction=None): return (
+        (US_Price*(100-USpctReduction)/100) - CAD_Price) / CAD_Price
+
+    def getUSConversion(x):
+        return x * 1.33
+
+    dfTemp = pd.DataFrame.from_dict(myDict, orient='index')
+    dfTemp["US_ConvertedPriceTo_CAD"] = dfTemp.priceTotal_usa.apply(
+        getUSConversion)
+    dfTemp["ProfitFactor"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 0).round(2)
+    dfTemp["PF_10pctBelow"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 10).round(2)
+    dfTemp["PF_15pctBelow"] = pct_gain(
+        dfTemp.priceTotal_canada, dfTemp.priceTotal_usa, 15).round(2)
+    return dfTemp
+
+
+
+def saveToFile(myASINList, threadNum, todaysDate, fileNameExtensionName='_Result.csv', isTest=False):
+    # def saveToFile(myASINList, threadNum, myDf, fileNameExtensionName='_Result.csv'):  -- OLD
+
+    for i in myASINList:
+        x = dictToDF(getBothCAN_US(i, threadNum, isTest))
+        print(x)
+
+        x.to_csv(todaysDate + fileNameExtensionName, mode='a', header=False)
+
+        # No need anymore as we are append to file now so DF is technically not needed
+        # myDf = myDf.append(x)
+        # myDf.to_csv(today + fileNameExtensionName)
+        # randomSleep()
+
+    print(' ****************** Non filtered DF ***************')
+    print(x)
