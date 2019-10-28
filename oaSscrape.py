@@ -43,10 +43,11 @@ class AMZSoupObject(object):
     HEADERS = {
         'User-Agent': random.choice(userAgents)}
 
-    def __init__(self, itemNumber, dotCAordotCOM, readFromFile=None):
+    def __init__(self, itemNumber, dotCAordotCOM, readFromFile=None, isTest=None):
         self.itemNumber = itemNumber
         self.dotCAordotCOM = dotCAordotCOM
         self.readFromFile = readFromFile
+        self.isTest = isTest
 
     def urlType(self):
         if self.dotCAordotCOM.upper() == 'CA':
@@ -79,12 +80,16 @@ class AMZSoupObject(object):
 
     def soupObj(self):
         if self.readFromFile is not None:
-            self.saveToFile(self.readFromFile, self.urlType())
-            # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
-            # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
-            print('Reading from file {}'.format(self.readFromFile))
-            # note for some reason html.parser was not getting all the data
-            return BeautifulSoup(open(self.readFromFile, encoding="utf-8"), 'lxml')
+            if self.isTest:
+                print('Reading test File file {}'.format(self.readFromFile))
+                return BeautifulSoup(open(self.readFromFile, encoding="utf-8"), 'lxml')
+            else:        
+                self.saveToFile(self.readFromFile, self.urlType())
+                # soup = BeautifulSoup(open('test.html'), 'lxml')  # note for some reason html.parser was not getting all the data
+                # soup = BeautifulSoup(open('testUS.html'), 'lxml')  # note for some reason html.parser was not getting all the data
+                print('Reading from file {}'.format(self.readFromFile))
+                # note for some reason html.parser was not getting all the data
+                return BeautifulSoup(open(self.readFromFile, encoding="utf-8"), 'lxml')
         else:
             response = requests.get(self.urlType(), headers=self.HEADERS)
 

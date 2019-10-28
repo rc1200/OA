@@ -5,7 +5,7 @@ import re
 import threading
 from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
-from oaUtilities import randomSleep, splitIntoListArray
+from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US
 
 
 # ********************************************
@@ -21,56 +21,17 @@ asinSubList = [[] for _ in range(n)]
 dfList = [pd.DataFrame() for _ in range(n)]  # May not need as we are appendint o csv file
 thread = [[] for _ in range(n)]
 
-# RM - create function to or maybe even class to create lists
+numOfLists = 1
 startNum = 1
-recordsPerList = 100
+recordsPerList = 2
 
-splitIntoListArray(myFullASINList, asinSubList, 5, 1, 100)
+# creaet an array of List to store the ASIN numbers
+splitIntoListArray(myFullASINList, asinSubList, numOfLists, startNum, recordsPerList)
 
 # ********************************************
 
 
-def getBothCAN_US(itemNum, threadNum):
 
-    loopDict = {'canada': ['ca', 'tempCan{}.html'.format(threadNum), None],
-                'usa': ['com', 'tempUS{}.html'.format(threadNum), 'ApplyUSFilter']
-                }
-
-    compareDict = {}
-
-    for k, v in loopDict.items():
-        print('{}: reading dict {},{} {}'.format(itemNum, k, v[0], v[1]))
-
-        # stores each Item into an amazon Object, first do Canada, then US based on Dict
-        myAmazonObj = AMZSoupObject(itemNum, v[0], v[1])
-        soup = myAmazonObj.soupObj()
-
-        # stores the ENTIRE soup object to a Class to be further filtered
-        alloffersObj = AllOffersObject(soup, v[2])
-        # extracts only the Offers div tags baed on attrs={'class': 'olpOffer'}
-        alloffersDivTxt = alloffersObj.getAllDataFromAttrib(
-            'class', 'olpOffer')
-        combinedDict = alloffersObj.getAllSellerDict(alloffersDivTxt)
-        lowestDict = alloffersObj.getLowestPricedObjectBasedOnCriteria(
-            combinedDict)
-
-        if k == 'canada':
-            compareDict[itemNum] = {'Seller_{}'.format(k): lowestDict['sellerName'],
-                                    'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-                                    'Condition_{}'.format(k): lowestDict['condition']}
-        else:
-            compareDict[itemNum].update({'Seller_{}'.format(k): lowestDict['sellerName'],
-                                         'priceTotal_{}'.format(k): lowestDict['priceTotal'],
-                                         'Condition_{}'.format(k): lowestDict['condition'],
-                                         'is_FBA_{}'.format(k): lowestDict['isFBA'],
-                                         'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
-
-        # randomSleep([3,5,6])
-        # randomSleep([2])
-
-    print('********************************* Final combinedDict below will be printed')
-    print(compareDict)
-    return compareDict
 
 
 def dictToDF(myDict):
