@@ -6,7 +6,7 @@ import time
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-
+from selenium.webdriver.chrome.options import Options
 
 class AMZSoupObject(object):
 
@@ -57,8 +57,13 @@ class AMZSoupObject(object):
 
     def saveToFile(self, FileName, url):
 
-        driver = webdriver.Chrome()
-        driver.get(url)
+        # can't use headless because it is similar to scraping and Amazon will cut it off
+        # self.options = Options()
+        # self.options.add_argument('--headless')
+        # self.options.add_argument('--disable-gpu')  # Last I checked this was necessary for Windows.
+        # self.driver = webdriver.Chrome(chrome_options=self.options)
+        self.driver = webdriver.Chrome()
+        self.driver.get(url)
         # time.sleep(5)
 
         # fileNameDict = {
@@ -67,7 +72,10 @@ class AMZSoupObject(object):
         # }
 
         with open(FileName, 'w', encoding="utf-8") as f:
-            f.write(driver.page_source)
+            f.write(self.driver.page_source)
+
+        self.driver.close()
+        
 
     def soupObj(self):
         if self.readFromFile is not None:

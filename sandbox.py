@@ -22,7 +22,7 @@ thread = [[] for _ in range(n)]
 
 # RM - create function to or maybe even class to create lists
 startNum = 1
-recordsPerList = 2
+recordsPerList = 100
 endNum = startNum + recordsPerList
 
 for i in range(n):
@@ -69,7 +69,7 @@ def getBothCAN_US(itemNum, threadNum):
                                          'lowestPriceFloor{}'.format(k): lowestDict['lowestPriceFloor']})
 
         # randomSleep([3,5,6])
-        randomSleep([0])
+        # randomSleep([2])
 
     print('********************************* Final combinedDict below will be printed')
     print(compareDict)
@@ -98,8 +98,7 @@ def dictToDF(myDict):
 
 def randomSleep(myList=None):
     # Adding Random sleep times to avoid throttling from Amazon
-    # sleepTimesSeconds = [5,12,17,24]
-    sleepTimesSeconds = [0]
+    sleepTimesSeconds = [5,12,17,24]
     if myList:
         sleepTimesSeconds = myList
 
