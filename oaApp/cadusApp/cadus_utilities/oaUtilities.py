@@ -1,6 +1,6 @@
 import pandas as pd
 import random
-from oaSscrape import AMZSoupObject, AllOffersObject
+from . oaSscrape import AMZSoupObject, AllOffersObject
 from time import sleep
 import os
 

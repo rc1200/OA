@@ -5,21 +5,14 @@ import re
 import threading
 from time import sleep
 from oaSscrape import AMZSoupObject, AllOffersObject
-from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF, saveToFile, combineCsvToOneFile
-import os
-
+from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF, saveToFile, combineCsvToOneFile, utilsPathFileName
 
 
 
 # ********************************************
-BASE_oaAPP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_oaAPP_Utilities_DIR  = os.path.join(BASE_oaAPP_DIR, 'cadus_utilities')
-CSV_FILE  = os.path.join(BASE_oaAPP_Utilities_DIR, 'asin2.csv')
 
-df_asin = pd.read_csv(CSV_FILE)
+df_asin = pd.read_csv(utilsPathFileName('asin2.csv'))
 myFullASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
-
-
 
 numOfLists = 1
 startNum = 1
@@ -69,7 +62,7 @@ print(allCsvFiles)
 headers =  ['ASIN', 'Seller_canada','priceTotal_canada', 'Condition_canada','Seller_usa', 'priceTotal_usa', 'Condition_usa',
     'is_FBA_usa','lowestPriceFloorusa','US_ConvertedPriceTo_CAD','ProfitFactor','PF_10pctBelow','PF_15pctBelow']
 
-combineCsvToOneFile(allCsvFiles, headers, os.path.join(BASE_oaAPP_DIR, 'combinedCSV.csv'))
+combineCsvToOneFile(allCsvFiles, headers, utilsPathFileName('combinedCSV.csv'))
 
 # ***********************   combine all csv files  **********************************
 

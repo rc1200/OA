@@ -8,12 +8,18 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+
+
 BASE_oaAPP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_oaAPP_Utilities_DIR  = os.path.join(BASE_oaAPP_DIR, 'cadus_utilities')
 
 def utilsPathFileName(fileName):
     return os.path.join(BASE_oaAPP_Utilities_DIR, fileName)
 
+
+# ********************************************
+
+df_asin = pd.read_csv(utilsPathFileName('asin2.csv'))
 
 
 class AMZSoupObject(object):
