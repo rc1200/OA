@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from . cadus_utilities.test import runSuperCode
+from time import sleep
+
 
 def home(request):
     sendtohtml = [1,2,3,4]
@@ -11,7 +13,8 @@ def home(request):
 def super(request):
     # sendtohtml = [1,2,3,4]
     sendtohtml = ['all','done','now',4]
-    # runSuperCode()
+    runSuperCode()
     print('sendtohtml')
     print(sendtohtml)
-    return redirect(home)
+    return render(request, 'home.html', {'sendtohtml' : sendtohtml})
+    # return redirect(home)
