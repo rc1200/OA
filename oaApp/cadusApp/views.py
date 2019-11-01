@@ -13,7 +13,7 @@ def home(request):
 def super(request):
     # sendtohtml = [1,2,3,4]
     sendtohtml = ['all','done','now',4]
-    runSuperCode()
+    # runSuperCode()
     print('sendtohtml')
     print(sendtohtml)
     return render(request, 'home.html', {'sendtohtml' : sendtohtml})
