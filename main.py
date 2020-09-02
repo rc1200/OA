@@ -13,9 +13,9 @@ from oaUtilities import randomSleep, splitIntoListArray, getBothCAN_US, dictToDF
 df_asin = pd.read_csv('asin.csv')
 myFullASINList = df_asin['ASIN'].drop_duplicates().values.tolist()
 
-numOfLists = 5
+numOfLists = 1
 startNum = 1
-recordsPerList = 100
+recordsPerList = 2
 
 # initalize empty lists
 asinSubList = [[] for _ in range(numOfLists)]

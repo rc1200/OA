@@ -6,7 +6,7 @@
         {
             "label": "RonPythonOA",
             "type": "shell",
-            "command": "C:\\ProgramData\\Anaconda3\\envs\\oa\\python.exe",
+            "command": "C:\\Program Files (x86)\\Python38-32\\python.exe",
             "args": [
                 "${file}"
             ],
